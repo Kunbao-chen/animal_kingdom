@@ -1,0 +1,31 @@
+{
+  "publisher": "Hanlin",
+  "grade": "P5",
+  "semester": "1",
+  "units": [
+    {
+      "unitId": "U1_Weather",
+      "title": "Unit 1: How's the Weather?",
+      "targetIndustry": "ice_cream_shop",
+      "vocabulary": ["sunny", "rainy", "windy", "hot", "cold", "ice cream", "juice"],
+      "sentencePatterns": [
+        "It is {weather} today.",
+        "I'd like some {item} because it's {weather}."
+      ],
+      "dialogues": [
+        {
+          "prompt": "It's so hot and sunny! I want something cold.",
+          "options": ["ice cream", "hot tea", "soup"],
+          "correct": "ice cream",
+          "audioText": "It is so hot and sunny today! Can I have some ice cream, please?"
+        },
+        {
+          "prompt": "Oh no, it's rainy outside! I need a warm drink.",
+          "options": ["iced juice", "hot chocolate", "ice cream"],
+          "correct": "hot chocolate",
+          "audioText": "It is rainy outside. I would like some hot chocolate."
+        }
+      ]
+    }
+  ]
+}
