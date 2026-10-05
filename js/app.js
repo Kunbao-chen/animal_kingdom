@@ -48,7 +48,7 @@ async function switchIndustryForCurrentUnit() {
 }
 
 function updateTopBar(gm) {
-  document.getElementById('coin-count').innerText = gm.coins;
+  document.getElementById('coin-count').innerText = gm.totalRevenue;
   document.getElementById('point-count').innerText = gm.starPoints;
 }
 

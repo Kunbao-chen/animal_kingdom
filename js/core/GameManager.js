@@ -1,11 +1,12 @@
 export default class GameManager {
   constructor() {
-    this.coins = 100;
+    this.totalRevenue = 0;
     this.starPoints = 0;
     this.currentCurriculum = null;
     this.currentUnit = null;
     this.unlockedIndustries = [];
     this.onStateChangeCallbacks = [];
+    this.soldItemsMap = {};
   }
 
   subscribe(callback) {
@@ -34,9 +35,10 @@ export default class GameManager {
     }
   }
 
-  addReward(coins, points) {
-    this.coins += coins;
-    this.starPoints += points;
+  addSale(price, itemId) {
+    this.totalRevenue += price;
+    this.starPoints += 10;
+    this.soldItemsMap[itemId] = (this.soldItemsMap[itemId] || 0) + 1;
     this.notify();
   }
 

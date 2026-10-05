@@ -7,23 +7,35 @@
       "unitId": "U1_Weather",
       "title": "Unit 1: How's the Weather?",
       "targetIndustry": "ice_cream_shop",
-      "vocabulary": ["sunny", "rainy", "windy", "hot", "cold", "ice cream", "juice"],
-      "sentencePatterns": [
-        "It is {weather} today.",
-        "I'd like some {item} because it's {weather}."
-      ],
+      "targetRevenue": 200,
       "dialogues": [
         {
-          "prompt": "It's so hot and sunny! I want something cold.",
-          "options": ["ice cream", "hot tea", "soup"],
-          "correct": "ice cream",
-          "audioText": "It is so hot and sunny today! Can I have some ice cream, please?"
+          "animal": "🐻",
+          "animalName": "小熊貝貝",
+          "promptText": "It is so hot and sunny today! Can I have some ice cream, please?",
+          "audioText": "It is so hot and sunny today! Can I have some ice cream, please?",
+          "correctItemId": "ice_cream"
         },
         {
-          "prompt": "Oh no, it's rainy outside! I need a warm drink.",
-          "options": ["iced juice", "hot chocolate", "ice cream"],
-          "correct": "hot chocolate",
-          "audioText": "It is rainy outside. I would like some hot chocolate."
+          "animal": "🐱",
+          "animalName": "花貓巧巧",
+          "promptText": "It is rainy outside. I would like some hot chocolate.",
+          "audioText": "It is rainy outside. I would like some hot chocolate.",
+          "correctItemId": "hot_chocolate"
+        },
+        {
+          "animal": "🐰",
+          "animalName": "兔子棉花",
+          "promptText": "It is windy today. Warm hot tea, please!",
+          "audioText": "It is windy today. Warm hot tea, please!",
+          "correctItemId": "hot_tea"
+        },
+        {
+          "animal": "🐶",
+          "animalName": "柴犬波波",
+          "promptText": "I'm so thirsty! Can I get some iced juice?",
+          "audioText": "I'm so thirsty! Can I get some iced juice?",
+          "correctItemId": "iced_juice"
         }
       ]
     }

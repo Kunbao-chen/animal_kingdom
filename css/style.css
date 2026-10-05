@@ -5,10 +5,11 @@
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background-color: #f0f7f4;
-  color: #333;
+  font-family: 'Fredoka', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #fdf8f2;
+  color: #4a3e3d;
   min-height: 100vh;
+  user-select: none;
 }
 
 #app {
@@ -21,43 +22,37 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #2b5876, #4e4376);
-  color: white;
-  padding: 15px 24px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  flex-wrap: wrap;
-  gap: 12px;
+  background: #8d5b4c;
+  color: #fff8f0;
+  padding: 12px 24px;
+  box-shadow: 0 4px 10px rgba(74, 62, 61, 0.2);
+  border-bottom: 4px solid #6b4135;
 }
 
 .brand {
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: bold;
+  letter-spacing: 1px;
 }
 
 .stats {
   display: flex;
-  gap: 20px;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 8px 16px;
+  gap: 16px;
+  background: #6b4135;
+  padding: 6px 16px;
   border-radius: 20px;
-  font-weight: 600;
-}
-
-.curriculum-selector {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-weight: bold;
 }
 
 .curriculum-selector select {
   padding: 6px 12px;
-  border-radius: 8px;
-  border: none;
+  border-radius: 12px;
+  border: 2px solid #6b4135;
   font-size: 0.95rem;
-  background-color: white;
-  color: #333;
+  background-color: #fff8f0;
+  color: #4a3e3d;
+  font-weight: bold;
   cursor: pointer;
-  outline: none;
 }
 
 #game-stage {
@@ -68,114 +63,300 @@ body {
   padding: 20px;
 }
 
-.shop-card {
-  background: white;
-  border-radius: 20px;
-  padding: 32px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+/* --- 店面櫃檯場景 --- */
+.restaurant-stage {
   width: 100%;
-  max-width: 520px;
-  text-align: center;
+  max-width: 800px;
+  background: #fffdf9;
+  border: 4px solid #8d5b4c;
+  border-radius: 24px;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
 }
 
-.shop-card h2 {
-  color: #2b5876;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
+.shop-header {
+  background: #e07a5f;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
 }
 
-.animal-customer {
+.target-badge {
+  background: #f4a261;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+.customer-area {
+  padding: 24px;
+  background: #fefae0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  min-height: 220px;
 }
 
-.avatar {
+.animal-avatar {
   font-size: 80px;
-  line-height: 1;
-  animation: bounce 2s infinite ease-in-out;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+  animation: float 2.5s ease-in-out infinite;
 }
 
-@keyframes bounce {
+@keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
 
 .speech-bubble {
-  background: #eef5ff;
-  border: 2px solid #3a7bd5;
-  border-radius: 16px;
-  padding: 16px 20px;
-  position: relative;
+  background: #ffffff;
+  border: 3px solid #8d5b4c;
+  border-radius: 18px;
+  padding: 14px 20px;
+  margin-top: 12px;
   width: 100%;
+  max-width: 580px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.speech-bubble p {
-  font-size: 1.1rem;
-  color: #2c3e50;
-  margin-bottom: 12px;
-  font-weight: 500;
+.speech-text {
+  font-size: 1.15rem;
+  color: #2b2d42;
+  font-weight: 600;
+  margin-bottom: 10px;
 }
 
-.speak-btn {
-  background: #3a7bd5;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9rem;
+.subtitle-toggle-text {
+  color: #8d8d8d;
+  font-style: italic;
+  font-weight: normal;
+}
+
+.audio-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.action-btn {
+  background: #f4a261;
+  color: #4a3e3d;
+  border: 2px solid #8d5b4c;
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.15s ease;
 }
 
-.speak-btn:hover {
-  background: #2d62ab;
+.action-btn:hover {
+  background: #e76f51;
+  color: white;
 }
 
-.options-group {
+.counter-desk {
+  background: linear-gradient(180deg, #d4a373 0%, #bc8a5f 100%);
+  border-top: 6px solid #8d5b4c;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.open-pos-btn {
+  background: #2a9d8f;
+  color: white;
+  border: 3px solid #1d7066;
+  padding: 16px 32px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #1d7066;
+  transition: all 0.1s ease;
+}
+
+.open-pos-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #1d7066;
+}
+
+/* --- POS 點餐系統彈窗 --- */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.pos-modal {
+  background: #fff8f0;
+  border: 4px solid #8d5b4c;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 720px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(0,0,0,0.2);
 }
 
-.options-group h3 {
-  font-size: 1rem;
-  color: #666;
+.pos-header {
+  background: #8d5b4c;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+.close-btn {
+  background: #e76f51;
+  border: none;
+  color: white;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pos-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.menu-section {
+  flex: 2;
+  padding: 16px;
+  overflow-y: auto;
+  border-right: 2px dashed #d4a373;
+}
+
+.menu-category {
+  margin-bottom: 16px;
+}
+
+.menu-category h4 {
+  color: #8d5b4c;
+  margin-bottom: 8px;
+  border-bottom: 2px solid #e07a5f;
+  padding-bottom: 4px;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.item-card {
+  background: white;
+  border: 2px solid #d4a373;
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.item-card:hover {
+  border-color: #2a9d8f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.item-icon {
+  font-size: 32px;
   margin-bottom: 4px;
 }
 
-.option-btn {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+.item-name {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #2b2d42;
 }
 
-.option-btn:hover {
-  background: #43a047;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+.item-price {
+  font-size: 0.8rem;
+  color: #e76f51;
+  font-weight: bold;
 }
 
-.primary-btn {
-  background: #3a7bd5;
+.ticket-section {
+  flex: 1;
+  background: #fff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-section h4 {
+  color: #8d5b4c;
+  margin-bottom: 12px;
+}
+
+.ticket-list {
+  flex: 1;
+  list-style: none;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.ticket-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.ticket-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-clear {
+  background: #e76f51;
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 10px;
   border-radius: 10px;
-  font-size: 1rem;
   cursor: pointer;
-  margin-top: 16px;
+  font-weight: bold;
 }
 
-.primary-btn:hover {
-  background: #2d62ab;
+.btn-submit {
+  flex: 1;
+  background: #2a9d8f;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.victory-card {
+  text-align: center;
+  padding: 30px;
+}
+
+.victory-card h2 {
+  color: #2a9d8f;
+  margin-bottom: 12px;
 }
