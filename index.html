@@ -1,28 +1,458 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>動物商業王國 - 櫃檯經營英文學習</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cute POS Game</title>
+<style>
+  :root {
+    --bg-color: #fceade;
+    --card-bg: #fffbf7;
+    --primary-color: #ff8b8b;
+    --accent-color: #2ec4b6;
+    --text-color: #5c4033;
+    --border-color: #e6c5b8;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Fredoka', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #6b4d3e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text-color);
+  }
+
+  .game-container {
+    width: 90%;
+    max-width: 950px;
+    background-color: var(--bg-color);
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+    border: 4px solid #4a3429;
+  }
+
+  /* Header */
+  .header {
+    background-color: #4a3429;
+    color: #fff;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .coins-display {
+    background-color: #ff9f1c;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 0 #c77700;
+  }
+
+  .target-prompt {
+    background-color: #ffffff;
+    color: #4a3429;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    border: 2px dashed #ff9f1c;
+  }
+
+  /* Main Layout */
+  .pos-body {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+    height: 520px;
+  }
+
+  /* Left Items Area */
+  .items-area {
+    flex: 2;
+    overflow-y: auto;
+    padding-right: 10px;
+  }
+
+  .category-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 15px 0 10px 0;
+    color: #8d5b4c;
+    border-bottom: 2px dashed var(--border-color);
+    padding-bottom: 5px;
+  }
+
+  .items-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .item-card {
+    background: var(--card-bg);
+    border: 3px solid var(--border-color);
+    border-radius: 18px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 0 var(--border-color);
+  }
+
+  .item-card:hover {
+    transform: translateY(-3px);
+    border-color: #ff9f1c;
+    box-shadow: 0 7px 0 #ff9f1c;
+  }
+
+  .item-card:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #ff9f1c;
+  }
+
+  .item-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 8px;
+  }
+
+  .item-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .item-price {
+    color: #e71d36;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  /* Right Order List Area */
+  .order-area {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 18px;
+    border: 3px solid var(--border-color);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .order-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .order-list {
+    flex: 1;
+    overflow-y: auto;
+    border-top: 2px solid #f0f0f0;
+    border-bottom: 2px solid #f0f0f0;
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #fff0f3;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: bold;
+  }
+
+  .action-btns {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    transition: transform 0.1s;
+  }
+
+  .btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+  }
+
+  .btn-clear {
+    background-color: var(--primary-color);
+  }
+
+  .btn-submit {
+    background-color: var(--accent-color);
+  }
+
+  /* Floating Feedback Effect */
+  .feedback {
+    position: absolute;
+    font-size: 2rem;
+    font-weight: bold;
+    pointer-events: none;
+    animation: floatUp 1s forwards;
+    z-index: 100;
+  }
+
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-50px) scale(1.3); }
+  }
+</style>
 </head>
 <body>
-  <div id="app">
-    <header id="top-bar">
-      <div class="brand">🐾 動物商業王國</div>
-      <div class="stats">
-        <div class="res-item">💰 總營業額: $<span id="coin-count">0</span></div>
-        <div class="res-item">⭐ 學習積分: <span id="point-count">0</span></div>
-      </div>
-      <div class="curriculum-selector">
-        <label for="unit-select">📚 課綱單元：</label>
-        <select id="unit-select"></select>
-      </div>
-    </header>
 
-    <main id="game-stage"></main>
+<div class="game-container">
+  <div class="header">
+    <div class="coins-display">
+      🪙 Coins: $<span id="coins-count">0</span>
+    </div>
+    <div class="target-prompt" id="target-prompt">
+      Order: Hot Tea
+    </div>
   </div>
 
-  <script type="module" src="js/app.js"></script>
+  <div class="pos-body">
+    <!-- Left Section: Item Grid -->
+    <div class="items-area">
+      
+      <div class="category-title">Ice Cream</div>
+      <div class="items-grid">
+        <div class="item-card" onclick="selectItem('Vanilla Ice Cream', 50)">
+          <svg class="item-icon" viewBox="0 0 100 100">
+            <!-- Cone -->
+            <polygon points="35,55 65,55 50,95" fill="#e3a054"/>
+            <path d="M35,55 Q50,60 65,55" fill="#c48037"/>
+            <!-- Scoop -->
+            <circle cx="50" cy="40" r="22" fill="#fff8dc"/>
+            <circle cx="40" cy="45" r="12" fill="#fff8dc"/>
+            <circle cx="60" cy="45" r="12" fill="#fff8dc"/>
+            <!-- Cute Face -->
+            <circle cx="43" cy="38" r="2.5" fill="#333"/>
+            <circle cx="57" cy="38" r="2.5" fill="#333"/>
+            <path d="M47,43 Q50,46 53,43" stroke="#333" stroke-width="2" fill="none"/>
+            <circle cx="39" cy="42" r="3" fill="#ffb6c1"/>
+            <circle cx="61" cy="42" r="3" fill="#ffb6c1"/>
+          </svg>
+          <div class="item-name">Vanilla Ice Cream</div>
+          <div class="item-price">$50</div>
+        </div>
+
+        <div class="item-card" onclick="selectItem('Chocolate Ice Cream', 50)">
+          <svg class="item-icon" viewBox="0 0 100 100">
+            <!-- Cone -->
+            <polygon points="35,55 65,55 50,95" fill="#e3a054"/>
+            <!-- Scoop -->
+            <circle cx="50" cy="40" r="22" fill="#6b3e2e"/>
+            <circle cx="40" cy="45" r="12" fill="#6b3e2e"/>
+            <circle cx="60" cy="45" r="12" fill="#6b3e2e"/>
+            <!-- Cherry -->
+            <circle cx="50" cy="16" r="6" fill="#e71d36"/>
+            <!-- Cute Face -->
+            <circle cx="43" cy="38" r="2.5" fill="#fff"/>
+            <circle cx="57" cy="38" r="2.5" fill="#fff"/>
+            <path d="M47,43 Q50,47 53,43" stroke="#fff" stroke-width="2" fill="none"/>
+          </svg>
+          <div class="item-name">Chocolate Ice Cream</div>
+          <div class="item-price">$50</div>
+        </div>
+      </div>
+
+      <div class="category-title">Hot Drinks</div>
+      <div class="items-grid">
+        <div class="item-card" onclick="selectItem('Hot Chocolate', 60)">
+          <svg class="item-icon" viewBox="0 0 100 100">
+            <!-- Mug -->
+            <rect x="25" y="35" width="45" height="50" rx="8" fill="#ff8b8b"/>
+            <path d="M70,45 C82,45 82,65 70,65" stroke="#ff8b8b" stroke-width="6" fill="none"/>
+            <rect x="27" y="37" width="41" height="10" rx="4" fill="#583101"/>
+            <!-- Steam -->
+            <path d="M38,25 Q43,18 38,12" stroke="#ddd" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M57,25 Q62,18 57,12" stroke="#ddd" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- Cute Face -->
+            <circle cx="38" cy="58" r="3" fill="#fff"/>
+            <circle cx="58" cy="58" r="3" fill="#fff"/>
+            <path d="M45,64 Q48,68 51,64" stroke="#fff" stroke-width="2" fill="none"/>
+          </svg>
+          <div class="item-name">Hot Chocolate</div>
+          <div class="item-price">$60</div>
+        </div>
+
+        <div class="item-card" onclick="selectItem('Hot Tea', 40)">
+          <svg class="item-icon" viewBox="0 0 100 100">
+            <!-- Cup -->
+            <path d="M25,35 L30,80 Q50,85 70,80 L75,35 Z" fill="#a8dadc"/>
+            <path d="M73,45 C83,45 83,63 72,63" stroke="#a8dadc" stroke-width="5" fill="none"/>
+            <!-- Tag -->
+            <path d="M50,35 L50,50 L42,58 L58,58 Z" fill="#ffb703"/>
+            <!-- Steam -->
+            <path d="M45,25 Q50,18 45,10" stroke="#ddd" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <!-- Cute Face -->
+            <line x1="38" y1="52" x2="44" y2="52" stroke="#1d3557" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="56" y1="52" x2="62" y2="52" stroke="#1d3557" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M47,57 Q50,60 53,57" stroke="#1d3557" stroke-width="2" fill="none"/>
+          </svg>
+          <div class="item-name">Hot Tea</div>
+          <div class="item-price">$40</div>
+        </div>
+      </div>
+
+      <div class="category-title">Cold Drinks</div>
+      <div class="items-grid">
+        <div class="item-card" onclick="selectItem('Iced Juice', 45)">
+          <svg class="item-icon" viewBox="0 0 100 100">
+            <!-- Glass -->
+            <polygon points="30,25 70,25 62,85 38,85" fill="#ffb703"/>
+            <!-- Straw -->
+            <rect x="58" y="8" width="5" height="40" transform="rotate(15 58 8)" fill="#ff4d6d"/>
+            <!-- Ice Cubes -->
+            <rect x="38" y="40" width="12" height="12" rx="2" fill="#fff" opacity="0.6"/>
+            <!-- Cute Face -->
+            <circle cx="43" cy="60" r="3" fill="#333"/>
+            <circle cx="57" cy="60" r="3" fill="#333"/>
+            <path d="M47,66 Q50,70 53,66" stroke="#333" stroke-width="2.5" fill="none"/>
+          </svg>
+          <div class="item-name">Iced Juice</div>
+          <div class="item-price">$45</div>
+        </div>
+
+        <div class="item-card" onclick="selectItem('Iced Coffee', 60)">
+          <svg class="item-icon" viewBox="0 0 100 100">
+            <!-- Glass -->
+            <polygon points="30,25 70,25 62,85 38,85" fill="#7f5539"/>
+            <!-- Straw -->
+            <rect x="42" y="8" width="5" height="40" transform="rotate(-10 42 8)" fill="#dda15e"/>
+            <!-- Cream Top -->
+            <ellipse cx="50" cy="25" rx="20" ry="6" fill="#fff"/>
+            <!-- Cute Face -->
+            <circle cx="43" cy="55" r="3" fill="#fff"/>
+            <circle cx="57" cy="55" r="3" fill="#fff"/>
+            <path d="M47,61 Q50,65 53,61" stroke="#fff" stroke-width="2" fill="none"/>
+          </svg>
+          <div class="item-name">Iced Coffee</div>
+          <div class="item-price">$60</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Section: Order Cart -->
+    <div class="order-area">
+      <div class="order-title">🛒 Order List</div>
+      <div class="order-list" id="order-list">
+        <!-- Selected item appears here -->
+      </div>
+      <div class="action-btns">
+        <button class="btn btn-clear" onclick="clearOrder()">Clear</button>
+        <button class="btn btn-submit" onclick="submitOrder()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let coins = 0;
+  let currentTarget = { name: "Hot Tea", price: 40 };
+  let selectedItem = null;
+
+  const menu = [
+    { name: "Vanilla Ice Cream", price: 50 },
+    { name: "Chocolate Ice Cream", price: 50 },
+    { name: "Hot Chocolate", price: 60 },
+    { name: "Hot Tea", price: 40 },
+    { name: "Iced Juice", price: 45 },
+    { name: "Iced Coffee", price: 60 }
+  ];
+
+  function selectItem(name, price) {
+    selectedItem = { name, price };
+    const listEl = document.getElementById('order-list');
+    listEl.innerHTML = `
+      <div class="order-item">
+        <span>${name}</span>
+        <span>$${price}</span>
+      </div>
+    `;
+  }
+
+  function clearOrder() {
+    selectedItem = null;
+    document.getElementById('order-list').innerHTML = '';
+  }
+
+  function submitOrder(e) {
+    if (!selectedItem) return;
+
+    const event = window.event;
+    if (selectedItem.name === currentTarget.name) {
+      // 點對賺錢（加全額）
+      coins += selectedItem.price;
+      showFeedback(`+$${selectedItem.price}`, '#2ec4b6', event.clientX, event.clientY);
+    } else {
+      // 點錯賠售價的一半
+      const penalty = Math.floor(selectedItem.price / 2);
+      coins -= penalty;
+      showFeedback(`-$${penalty}`, '#e71d36', event.clientX, event.clientY);
+    }
+
+    // Update coins UI
+    document.getElementById('coins-count').innerText = coins;
+
+    // Reset Cart & Generate New Order Target
+    clearOrder();
+    nextOrder();
+  }
+
+  function nextOrder() {
+    const randomIndex = Math.floor(Math.random() * menu.length);
+    currentTarget = menu[randomIndex];
+    document.getElementById('target-prompt').innerText = `Order: ${currentTarget.name}`;
+  }
+
+  function showFeedback(text, color, x, y) {
+    const el = document.createElement('div');
+    el.className = 'feedback';
+    el.innerText = text;
+    el.style.color = color;
+    el.style.left = `${x || window.innerWidth/2}px`;
+    el.style.top = `${y || window.innerHeight/2}px`;
+    document.body.appendChild(el);
+
+    setTimeout(() => {
+      el.remove();
+    }, 1000);
+  }
+</script>
+
 </body>
 </html>
