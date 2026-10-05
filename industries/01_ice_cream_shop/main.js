@@ -1,10 +1,9 @@
 /**
  * Ice Cream Shop Industry Module
- * Cleaned POS Modal: English UI, SVG Icons, Coins-only tracking, and Half-Price Penalty logic.
+ * Fully compatible with ModuleLoader & GameManager structure.
  */
 
 (function () {
-  // Define Industry Module object
   const IceCreamShop = {
     id: "01_ice_cream_shop",
     name: "Ice Cream Shop",
@@ -12,6 +11,7 @@
     currentCustomerOrder: null,
     selectedItem: null,
 
+    // Menu Specification
     menu: [
       {
         id: "vanilla_ice_cream",
@@ -57,8 +57,9 @@
       }
     ],
 
+    // Life-cycle init method
     init: function (container) {
-      this.container = container || document.getElementById("game-container") || document.body;
+      this.container = container || document.getElementById("main-content") || document.body;
       this.injectStyles();
       this.renderMainScene();
       this.renderPosModal();
@@ -73,13 +74,14 @@
         .industry-scene {
           width: 100%;
           height: 100%;
-          min-height: 500px;
+          min-height: 480px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
           background: #fceade;
           position: relative;
+          border-radius: 12px;
         }
         .dialogue-box {
           background: #ffffff;
@@ -89,7 +91,7 @@
           font-size: 1.2rem;
           font-weight: bold;
           color: #4a3429;
-          margin-bottom: 20px;
+          margin-bottom: 25px;
           box-shadow: 0 6px 0 #4a3429;
           text-align: center;
           max-width: 80%;
@@ -128,7 +130,7 @@
           flex-direction: column;
           overflow: hidden;
           box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-          font-family: 'Fredoka', Arial, sans-serif;
+          font-family: Arial, sans-serif;
         }
         .pos-header {
           background-color: #4a3429;
@@ -352,13 +354,16 @@
     }
   };
 
-  // Bind instance globally and register into system
+  // Mount Instance Globally
   window.IceCreamShopInstance = IceCreamShop;
+  window.IceCreamShopModule = IceCreamShop;
 
-  if (window.GameManager && typeof window.GameManager.registerModule === "function") {
+  // Multi-Framework Auto Registration
+  if (window.ModuleLoader && typeof window.ModuleLoader.register === "function") {
+    window.ModuleLoader.register("01_ice_cream_shop", IceCreamShop);
+  } else if (window.GameManager && typeof window.GameManager.registerModule === "function") {
     window.GameManager.registerModule("01_ice_cream_shop", IceCreamShop);
   } else {
     window["01_ice_cream_shop"] = IceCreamShop;
-    window["IceCreamShopModule"] = IceCreamShop;
   }
 })();
