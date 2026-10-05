@@ -1,208 +1,398 @@
-export default class IceCreamShopIndustry {
-  constructor() {
-    this.gameManager = null;
-    this.container = null;
-    this.currentQuestionIndex = 0;
-    this.showSubtitles = true;
-    this.orderTicket = [];
+/**
+ * Ice Cream Shop Industry Module
+ * Integrated with full conversation layout, English-only POS UI, big SVG icons, and half-price penalty logic.
+ */
 
-    // 完整的菜單資料庫 (防止盲猜)
-    this.menu = [
-      { id: 'ice_cream', name: '🍦 香草冰淇淋 (Ice Cream)', price: 50, category: '冰品類' },
-      { id: 'chocolate_ice', name: '🍨 巧克力冰 (Chocolate Ice)', price: 50, category: '冰品類' },
-      { id: 'hot_chocolate', name: '☕ 熱可可 (Hot Chocolate)', price: 60, category: '熱飲類' },
-      { id: 'hot_tea', name: '🍵 熱紅茶 (Hot Tea)', price: 40, category: '熱飲類' },
-      { id: 'iced_juice', name: '🧃 冷果汁 (Iced Juice)', price: 45, category: '冷飲類' },
-      { id: 'iced_coffee', name: '🥤 冰咖啡 (Iced Coffee)', price: 60, category: '冷飲類' },
-      { id: 'soup', name: '🥣 熱湯 (Soup)', price: 55, category: '熱食類' },
-      { id: 'cake', name: '🍰 蛋糕 (Cake)', price: 70, category: '點心類' }
-    ];
-  }
+window.IceCreamShopModule = {
+  // Game State
+  coins: 0,
+  currentCustomerOrder: null,
+  selectedItem: null,
 
-  init(gameManager, containerElement) {
-    this.gameManager = gameManager;
-    this.container = containerElement;
-    this.render();
-  }
+  // Menu items specification with custom SVG artwork
+  menu: [
+    {
+      id: "vanilla_ice_cream",
+      name: "Vanilla Ice Cream",
+      category: "Ice Cream",
+      price: 50,
+      svg: `<svg viewBox="0 0 100 100" class="pos-svg-icon"><polygon points="35,55 65,55 50,95" fill="#e3a054"/><path d="M35,55 Q50,60 65,55" fill="#c48037"/><circle cx="50" cy="40" r="22" fill="#fff8dc"/><circle cx="40" cy="45" r="12" fill="#fff8dc"/><circle cx="60" cy="45" r="12" fill="#fff8dc"/><circle cx="43" cy="38" r="2.5" fill="#333"/><circle cx="57" cy="38" r="2.5" fill="#333"/><path d="M47,43 Q50,46 53,43" stroke="#333" stroke-width="2" fill="none"/><circle cx="39" cy="42" r="3" fill="#ffb6c1"/><circle cx="61" cy="42" r="3" fill="#ffb6c1"/></svg>`
+    },
+    {
+      id: "chocolate_ice_cream",
+      name: "Chocolate Ice Cream",
+      category: "Ice Cream",
+      price: 50,
+      svg: `<svg viewBox="0 0 100 100" class="pos-svg-icon"><polygon points="35,55 65,55 50,95" fill="#e3a054"/><circle cx="50" cy="40" r="22" fill="#6b3e2e"/><circle cx="40" cy="45" r="12" fill="#6b3e2e"/><circle cx="60" cy="45" r="12" fill="#6b3e2e"/><circle cx="50" cy="16" r="6" fill="#e71d36"/><circle cx="43" cy="38" r="2.5" fill="#fff"/><circle cx="57" cy="38" r="2.5" fill="#fff"/><path d="M47,43 Q50,47 53,43" stroke="#fff" stroke-width="2" fill="none"/></svg>`
+    },
+    {
+      id: "hot_chocolate",
+      name: "Hot Chocolate",
+      category: "Hot Drinks",
+      price: 60,
+      svg: `<svg viewBox="0 0 100 100" class="pos-svg-icon"><rect x="25" y="35" width="45" height="50" rx="8" fill="#ff8b8b"/><path d="M70,45 C82,45 82,65 70,65" stroke="#ff8b8b" stroke-width="6" fill="none"/><rect x="27" y="37" width="41" height="10" rx="4" fill="#583101"/><path d="M38,25 Q43,18 38,12" stroke="#ddd" stroke-width="3" fill="none"/><path d="M57,25 Q62,18 57,12" stroke="#ddd" stroke-width="3" fill="none"/><circle cx="38" cy="58" r="3" fill="#fff"/><circle cx="58" cy="58" r="3" fill="#fff"/><path d="M45,64 Q48,68 51,64" stroke="#fff" stroke-width="2" fill="none"/></svg>`
+    },
+    {
+      id: "hot_tea",
+      name: "Hot Tea",
+      category: "Hot Drinks",
+      price: 40,
+      svg: `<svg viewBox="0 0 100 100" class="pos-svg-icon"><path d="M25,35 L30,80 Q50,85 70,80 L75,35 Z" fill="#a8dadc"/><path d="M73,45 C83,45 83,63 72,63" stroke="#a8dadc" stroke-width="5" fill="none"/><path d="M50,35 L50,50 L42,58 L58,58 Z" fill="#ffb703"/><path d="M45,25 Q50,18 45,10" stroke="#ddd" stroke-width="3" fill="none"/><line x1="38" y1="52" x2="44" y2="52" stroke="#1d3557" stroke-width="2.5"/><line x1="56" y1="52" x2="62" y2="52" stroke="#1d3557" stroke-width="2.5"/><path d="M47,57 Q50,60 53,57" stroke="#1d3557" stroke-width="2" fill="none"/></svg>`
+    },
+    {
+      id: "iced_juice",
+      name: "Iced Juice",
+      category: "Cold Drinks",
+      price: 45,
+      svg: `<svg viewBox="0 0 100 100" class="pos-svg-icon"><polygon points="30,25 70,25 62,85 38,85" fill="#ffb703"/><rect x="58" y="8" width="5" height="40" transform="rotate(15 58 8)" fill="#ff4d6d"/><rect x="38" y="40" width="12" height="12" rx="2" fill="#fff" opacity="0.6"/><circle cx="43" cy="60" r="3" fill="#333"/><circle cx="57" cy="60" r="3" fill="#333"/><path d="M47,66 Q50,70 53,66" stroke="#333" stroke-width="2.5" fill="none"/></svg>`
+    },
+    {
+      id: "iced_coffee",
+      name: "Iced Coffee",
+      category: "Cold Drinks",
+      price: 60,
+      svg: `<svg viewBox="0 0 100 100" class="pos-svg-icon"><polygon points="30,25 70,25 62,85 38,85" fill="#7f5539"/><rect x="42" y="8" width="5" height="40" transform="rotate(-10 42 8)" fill="#dda15e"/><ellipse cx="50" cy="25" rx="20" ry="6" fill="#fff"/><circle cx="43" cy="55" r="3" fill="#fff"/><circle cx="57" cy="55" r="3" fill="#fff"/><path d="M47,61 Q50,65 53,61" stroke="#fff" stroke-width="2" fill="none"/></svg>`
+    }
+  ],
 
-  render() {
-    const unit = this.gameManager.currentUnit;
-    const dialogues = unit ? unit.dialogues : [];
-    const question = dialogues[this.currentQuestionIndex];
+  init: function () {
+    this.injectStyles();
+    this.renderPosModal();
+    this.nextCustomer();
+  },
 
-    if (!question) {
-      this.renderVictoryStage(unit);
-      return;
+  // Inject custom styles for big icons and English POS UI
+  injectStyles: function () {
+    if (document.getElementById("pos-custom-styles")) return;
+    const style = document.createElement("style");
+    style.id = "pos-custom-styles";
+    style.innerHTML = `
+      .pos-modal-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      .pos-modal-overlay.active { display: flex; }
+      .pos-container {
+        width: 820px;
+        max-width: 95vw;
+        height: 520px;
+        background-color: #fffbf7;
+        border-radius: 20px;
+        border: 4px solid #4a3429;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        font-family: 'Fredoka', Arial, sans-serif;
+      }
+      .pos-header {
+        background-color: #4a3429;
+        color: #fff;
+        padding: 12px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .pos-coins-badge {
+        background-color: #ff9f1c;
+        color: #fff;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        box-shadow: 0 3px 0 #c77700;
+      }
+      .pos-body {
+        display: flex;
+        flex: 1;
+        padding: 16px;
+        gap: 16px;
+        overflow: hidden;
+      }
+      .pos-items-area {
+        flex: 2;
+        overflow-y: auto;
+        padding-right: 8px;
+      }
+      .pos-category-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #8d5b4c;
+        margin: 10px 0 8px 0;
+        border-bottom: 2px dashed #e6c5b8;
+      }
+      .pos-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+      .pos-card {
+        background: #ffffff;
+        border: 2px solid #e6c5b8;
+        border-radius: 14px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        box-shadow: 0 4px 0 #e6c5b8;
+      }
+      .pos-card:hover {
+        transform: translateY(-2px);
+        border-color: #ff9f1c;
+        box-shadow: 0 6px 0 #ff9f1c;
+      }
+      .pos-card.selected {
+        border-color: #ff8b8b;
+        background-color: #fff0f3;
+        box-shadow: 0 4px 0 #ff8b8b;
+      }
+      .pos-svg-icon {
+        width: 75px;
+        height: 75px;
+        margin-bottom: 4px;
+      }
+      .pos-card-name {
+        font-weight: bold;
+        font-size: 0.95rem;
+        color: #4a3429;
+        text-align: center;
+      }
+      .pos-card-price {
+        color: #e71d36;
+        font-weight: bold;
+        font-size: 0.95rem;
+      }
+      .pos-order-sidebar {
+        flex: 1;
+        background: #ffffff;
+        border: 2px solid #e6c5b8;
+        border-radius: 14px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+      }
+      .pos-order-title {
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #4a3429;
+        margin-bottom: 8px;
+      }
+      .pos-order-list {
+        flex: 1;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        padding: 8px 0;
+        overflow-y: auto;
+      }
+      .pos-cart-item {
+        display: flex;
+        justify-content: space-between;
+        background: #fff0f3;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        color: #4a3429;
+      }
+      .pos-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .pos-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        font-size: 0.95rem;
+        box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+      }
+      .pos-btn-clear { background-color: #ff8b8b; }
+      .pos-btn-submit { background-color: #2ec4b6; }
+      .pos-btn:active { transform: translateY(2px); box-shadow: none; }
+      .pos-feedback {
+        position: fixed;
+        font-size: 2.2rem;
+        font-weight: bold;
+        pointer-events: none;
+        animation: posFloatUp 1s forwards;
+        z-index: 10000;
+      }
+      @keyframes posFloatUp {
+        0% { opacity: 1; transform: translateY(0) scale(1); }
+        100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
+      }
+    `;
+    document.head.appendChild(style);
+  },
+
+  // Render the English-only POS Modal into DOM
+  renderPosModal: function () {
+    let overlay = document.getElementById("pos-modal-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.id = "pos-modal-overlay";
+      overlay.className = "pos-modal-overlay";
+      document.body.appendChild(overlay);
     }
 
-    this.container.innerHTML = `
-      <div class="restaurant-stage">
-        <div class="shop-header">
-          <span>🏪 森林冰品飲料店 (櫃檯)</span>
-          <span class="target-badge">🎯 目標營業額: $${unit.targetRevenue || 200}</span>
-        </div>
+    const categories = ["Ice Cream", "Hot Drinks", "Cold Drinks"];
 
-        <div class="customer-area">
-          <div class="animal-avatar">${question.animal || '🐻'}</div>
-          <div style="font-weight:bold; margin-top: 4px;">${question.animalName || '顧客'}</div>
-          
-          <div class="speech-bubble">
-            <div class="speech-text" id="subtitle-box">
-              ${this.showSubtitles ? question.promptText : '<span class="subtitle-toggle-text">🙈 字幕已隱藏 (聽力挑戰中)</span>'}
-            </div>
-            <div class="audio-controls">
-              <button id="speak-btn" class="action-btn">🔊 重聽語音</button>
-              <button id="toggle-sub-btn" class="action-btn">👁️ ${this.showSubtitles ? '隱藏字幕' : '顯示字幕'}</button>
-            </div>
+    let categoriesHTML = categories.map(cat => {
+      const items = this.menu.filter(item => item.category === cat);
+      const itemsHTML = items.map(item => `
+        <div class="pos-card" id="pos-item-${item.id}" onclick="IceCreamShopModule.selectPosItem('${item.id}')">
+          ${item.svg}
+          <div class="pos-card-name">${item.name}</div>
+          <div class="pos-card-price">$${item.price}</div>
+        </div>
+      `).join("");
+
+      return `
+        <div class="pos-category-title">${cat}</div>
+        <div class="pos-grid">${itemsHTML}</div>
+      `;
+    }).join("");
+
+    overlay.innerHTML = `
+      <div class="pos-container">
+        <div class="pos-header">
+          <div style="font-size: 1.2rem; font-weight: bold;">🛒 POS System</div>
+          <div class="pos-coins-badge">🪙 Coins: $<span id="pos-coins-display">${this.coins}</span></div>
+          <button style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;" onclick="IceCreamShopModule.closePos()">×</button>
+        </div>
+        <div class="pos-body">
+          <div class="pos-items-area">
+            ${categoriesHTML}
           </div>
-        </div>
-
-        <div class="counter-desk">
-          <button id="open-pos-btn" class="open-pos-btn">📱 打開 POS 點餐機點餐</button>
-        </div>
-      </div>
-      <div id="modal-container"></div>
-    `;
-
-    document.getElementById('speak-btn').addEventListener('click', () => {
-      this.gameManager.speak(question.audioText);
-    });
-
-    document.getElementById('toggle-sub-btn').addEventListener('click', () => {
-      this.showSubtitles = !this.showSubtitles;
-      this.render();
-    });
-
-    document.getElementById('open-pos-btn').addEventListener('click', () => {
-      this.openPosModal(question);
-    });
-
-    this.gameManager.speak(question.audioText);
-  }
-
-  openPosModal(question) {
-    const modalContainer = document.getElementById('modal-container');
-    this.orderTicket = [];
-
-    const categories = ['冰品類', '熱飲類', '冷飲類', '熱食類', '點心類'];
-
-    modalContainer.innerHTML = `
-      <div class="modal-overlay">
-        <div class="pos-modal">
-          <div class="pos-header">
-            <span>📱 POS 點餐系統</span>
-            <button id="close-pos-btn" class="close-btn">✕</button>
-          </div>
-          <div class="pos-body">
-            <div class="menu-section">
-              ${categories.map(cat => `
-                <div class="menu-category">
-                  <h4>${cat}</h4>
-                  <div class="menu-grid">
-                    ${this.menu.filter(m => m.category === cat).map(item => `
-                      <div class="item-card" data-id="${item.id}">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-price">$${item.price}</div>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-
-            <div class="ticket-section">
-              <h4>🛒 點餐清單</h4>
-              <ul id="ticket-list" class="ticket-list"></ul>
-              <div class="ticket-actions">
-                <button id="clear-ticket-btn" class="btn-clear">清空</button>
-                <button id="submit-ticket-btn" class="btn-submit">📥 送單結帳</button>
-              </div>
+          <div class="pos-order-sidebar">
+            <div class="pos-order-title">🛒 Order List</div>
+            <div id="pos-order-list" class="pos-order-list"></div>
+            <div class="pos-actions">
+              <button class="pos-btn pos-btn-clear" onclick="IceCreamShopModule.clearCart()">Clear</button>
+              <button class="pos-btn pos-btn-submit" onclick="IceCreamShopModule.submitOrder(event)">Submit</button>
             </div>
           </div>
         </div>
       </div>
     `;
+  },
 
-    document.getElementById('close-pos-btn').addEventListener('click', () => {
-      modalContainer.innerHTML = '';
-    });
+  openPos: function () {
+    this.clearCart();
+    document.getElementById("pos-modal-overlay").classList.add("active");
+  },
 
-    modalContainer.querySelectorAll('.item-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const itemId = card.getAttribute('data-id');
-        const item = this.menu.find(m => m.id === itemId);
-        if (item) {
-          this.orderTicket.push(item);
-          this.updateTicketUI();
-        }
-      });
-    });
+  closePos: function () {
+    document.getElementById("pos-modal-overlay").classList.remove("active");
+  },
 
-    document.getElementById('clear-ticket-btn').addEventListener('click', () => {
-      this.orderTicket = [];
-      this.updateTicketUI();
-    });
+  selectPosItem: function (itemId) {
+    const item = this.menu.find(i => i.id === itemId);
+    if (!item) return;
 
-    document.getElementById('submit-ticket-btn').addEventListener('click', () => {
-      this.checkOrder(question);
-    });
-  }
+    this.selectedItem = item;
 
-  updateTicketUI() {
-    const ticketList = document.getElementById('ticket-list');
-    if (!ticketList) return;
-    ticketList.innerHTML = this.orderTicket.map((item, index) => `
-      <li class="ticket-item">
+    // Highlight selected card
+    document.querySelectorAll(".pos-card").forEach(card => card.classList.remove("selected"));
+    const cardEl = document.getElementById(`pos-item-${itemId}`);
+    if (cardEl) cardEl.classList.add("selected");
+
+    // Update cart UI
+    const listEl = document.getElementById("pos-order-list");
+    listEl.innerHTML = `
+      <div class="pos-cart-item">
         <span>${item.name}</span>
         <span>$${item.price}</span>
-      </li>
-    `).join('');
-  }
-
-  checkOrder(question) {
-    if (this.orderTicket.length === 0) {
-      alert('⚠️ 點餐單是空的，請選擇餐點！');
-      return;
-    }
-
-    const isCorrect = this.orderTicket.length === 1 && this.orderTicket[0].id === question.correctItemId;
-
-    if (isCorrect) {
-      const soldItem = this.orderTicket[0];
-      alert(`🎉 答對了！${question.animalName}非常滿意！收到 $${soldItem.price}`);
-      this.gameManager.addSale(soldItem.price, soldItem.id);
-      document.getElementById('modal-container').innerHTML = '';
-      this.currentQuestionIndex++;
-      this.render();
-    } else {
-      alert(`❌ 點餐錯誤！${question.animalName}說：「这不是我點的，請重新幫我點一遍！」`);
-      this.gameManager.speak(`No, thank you. That is not what I ordered.`);
-      this.orderTicket = [];
-      this.updateTicketUI();
-    }
-  }
-
-  renderVictoryStage(unit) {
-    this.container.innerHTML = `
-      <div class="restaurant-stage victory-card">
-        <h2>🎉 本店營運成功！目標營業額達標！</h2>
-        <p style="font-size: 1.1rem; margin: 16px 0; color: #555;">
-          恭喜你完成「${unit.title}」的所有顧客點餐！你已經賺取足夠的資金！
-        </p>
-        <div style="font-size: 60px; margin: 20px 0;">🎡 🦁 🌴</div>
-        <p style="font-size: 1.1rem; font-weight: bold; color: #2a9d8f;">
-          🔓 已成功解鎖下一個產業地點：【02_奇幻動物園】與【03_觀光景點】！
-        </p>
-        <button id="reset-btn" class="action-btn" style="margin-top:20px; padding: 12px 24px; font-size: 1rem;">🔄 重新經營此單元</button>
       </div>
     `;
-    document.getElementById('reset-btn').addEventListener('click', () => {
-      this.currentQuestionIndex = 0;
-      this.render();
-    });
-  }
+  },
 
-  destroy() {
-    this.container.innerHTML = '';
+  clearCart: function () {
+    this.selectedItem = null;
+    document.querySelectorAll(".pos-card").forEach(card => card.classList.remove("selected"));
+    const listEl = document.getElementById("pos-order-list");
+    if (listEl) listEl.innerHTML = "";
+  },
+
+  submitOrder: function (event) {
+    if (!this.selectedItem) return;
+
+    const clickedItem = this.selectedItem;
+    const isCorrect = this.currentCustomerOrder && (clickedItem.id === this.currentCustomerOrder.id);
+
+    if (isCorrect) {
+      // Correct: earn full price
+      const reward = clickedItem.price;
+      this.coins += reward;
+      this.showFeedback(`+$${reward}`, "#2ec4b6", event.clientX, event.clientY);
+    } else {
+      // Incorrect: lose half of item price
+      const penalty = Math.floor(clickedItem.price / 2);
+      this.coins -= penalty;
+      if (this.coins < 0) this.coins = 0;
+      this.showFeedback(`-$${penalty}`, "#e71d36", event.clientX, event.clientY);
+    }
+
+    // Update global & modal UI
+    document.getElementById("pos-coins-display").innerText = this.coins;
+    this.clearCart();
+    this.closePos();
+
+    // Trigger dialogue feedback
+    this.handleDialogueResponse(isCorrect);
+  },
+
+  showFeedback: function (text, color, x, y) {
+    const el = document.createElement("div");
+    el.className = "pos-feedback";
+    el.innerText = text;
+    el.style.color = color;
+    el.style.left = `${x || window.innerWidth / 2}px`;
+    el.style.top = `${y || window.innerHeight / 2}px`;
+    document.body.appendChild(el);
+
+    setTimeout(() => { el.remove(); }, 1000);
+  },
+
+  // Customer & Dialogue System Integration
+  nextCustomer: function () {
+    const randomIdx = Math.floor(Math.random() * this.menu.length);
+    this.currentCustomerOrder = this.menu[randomIdx];
+
+    // Update customer dialogue on main screen (Keep original dialogue UI)
+    const dialogueBox = document.getElementById("customer-dialogue-text");
+    if (dialogueBox) {
+      dialogueBox.innerText = `Hello! I would like to order one ${this.currentCustomerOrder.name}, please.`;
+    }
+  },
+
+  handleDialogueResponse: function (isCorrect) {
+    const dialogueBox = document.getElementById("customer-dialogue-text");
+    if (!dialogueBox) return;
+
+    if (isCorrect) {
+      dialogueBox.innerText = "Thank you! This is exactly what I wanted! 😄";
+    } else {
+      dialogueBox.innerText = `Oh no! I wanted ${this.currentCustomerOrder.name}, but you gave me this... 😢`;
+    }
+
+    setTimeout(() => {
+      this.nextCustomer();
+    }, 2000);
   }
-}
+};
+
+// Initialize when DOM ready
+document.addEventListener("DOMContentLoaded", () => {
+  IceCreamShopModule.init();
+});
