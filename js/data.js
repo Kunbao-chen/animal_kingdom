@@ -8,8 +8,15 @@ const GAME_DATABASE = {
             "Here is your {item}."
         ],
 
+        // 🎁 可兌換的禮物清單
+        rewards: [
+            { id: "sticker", name: "🍦 Ice Cream Voucher", cost: 5, desc: "A free ice cream card!" },
+            { id: "zoo_ticket", name: "🦁 Zoo Ticket", cost: 10, desc: "Unlock English Zoo Theme!" },
+            { id: "chef_hat", name: "👨‍🍳 Master Chef Hat", cost: 15, desc: "Special Gold Chef Badge!" }
+        ],
+
         menu: [
-            // 🥤 飲料類 (Drinks)
+            // 🥤 飲料類
             { id: "iced_coffee",  name: "Iced Coffee",     article: "some", keywords: ["iced", "coffee"],   tags: ["cold", "drink"] },
             { id: "hot_coffee",   name: "Hot Coffee",      article: "some", keywords: ["hot", "coffee"],    tags: ["hot", "drink"] },
             { id: "iced_tea",     name: "Iced Tea",        article: "some", keywords: ["iced", "tea"],      tags: ["cold", "drink"] },
@@ -20,7 +27,7 @@ const GAME_DATABASE = {
             { id: "bubble_tea",   name: "Bubble Tea",      article: "some", keywords: ["bubble", "tea"],    tags: ["cold", "drink", "sweet"] },
             { id: "water",        name: "Water",           article: "some", keywords: ["water"],            tags: ["cold", "drink"] },
 
-            // 🍔 主餐類 (Meals)
+            // 🍔 主餐類
             { id: "hamburger",    name: "Hamburger",       article: "a",    keywords: ["hamburger"],        tags: ["meal", "hot"] },
             { id: "hot_dog",      name: "Hot Dog",         article: "a",    keywords: ["hot", "dog"],       tags: ["meal", "hot"] },
             { id: "pizza",        name: "Pizza",           article: "some", keywords: ["pizza"],            tags: ["meal", "hot"] },
@@ -29,7 +36,7 @@ const GAME_DATABASE = {
             { id: "fried_chicken",name: "Fried Chicken",   article: "some", keywords: ["fried", "chicken"], tags: ["meal", "hot"] },
             { id: "salad",        name: "Salad",           article: "a",    keywords: ["salad"],            tags: ["meal", "cold"] },
 
-            // 🍰 點心類 (Desserts)
+            // 🍰 點心類
             { id: "ice_cream",    name: "Ice Cream",       article: "some", keywords: ["ice", "cream"],     tags: ["dessert", "cold", "sweet"] },
             { id: "chocolate_cake",name: "Chocolate Cake", article: "some", keywords: ["chocolate", "cake"],tags: ["dessert", "sweet"] },
             { id: "cookie",       name: "Cookie",          article: "a",    keywords: ["cookie"],           tags: ["dessert", "sweet"] },
@@ -42,6 +49,7 @@ const GAME_DATABASE = {
                 avatar: "🧔",
                 text: "It is super hot outside! I need something cold to drink.",
                 requiredTags: ["cold", "drink"],
+                hintText: "I asked for a COLD drink!",
                 successText: "Yummy! That's so cool and refreshing! (+1)",
                 failText: "Oh no... I really need a cold drink! (-1)"
             },
@@ -49,6 +57,7 @@ const GAME_DATABASE = {
                 avatar: "👩",
                 text: "I am freezing today! Can I have a warm drink?",
                 requiredTags: ["hot", "drink"],
+                hintText: "I need a HOT or WARM drink!",
                 successText: "Thank you! This hot drink keeps me warm! (+1)",
                 failText: "Brrr! I asked for a HOT drink! (-1)"
             },
@@ -56,6 +65,7 @@ const GAME_DATABASE = {
                 avatar: "👦",
                 text: "I am starving! I want a hot meal for lunch.",
                 requiredTags: ["meal", "hot"],
+                hintText: "I am hungry for a HOT MEAL!",
                 successText: "Delicious! Exactly what I needed for lunch! (+1)",
                 failText: "I'm hungry, I need a hot meal! (-1)"
             },
@@ -63,6 +73,7 @@ const GAME_DATABASE = {
                 avatar: "👧",
                 text: "I want a sweet dessert after lunch!",
                 requiredTags: ["dessert", "sweet"],
+                hintText: "I am looking for a SWEET DESSERT!",
                 successText: "Mmm, so sweet and delicious! I love it! (+1)",
                 failText: "I asked for something sweet! (-1)"
             },
@@ -70,6 +81,7 @@ const GAME_DATABASE = {
                 avatar: "👴",
                 text: "My mouth feels dry. Just a glass of simple drink, please.",
                 requiredTags: ["drink"],
+                hintText: "I just need a DRINK!",
                 successText: "Ah, much better! Thank you! (+1)",
                 failText: "I just wanted a simple drink! (-1)"
             },
@@ -77,6 +89,7 @@ const GAME_DATABASE = {
                 avatar: "👩‍🦰",
                 text: "Do you have Taiwan's famous sweet drink with tapioca pearls?",
                 requiredTags: ["sweet", "drink"],
+                hintText: "I want a SWEET DRINK with tapioca pearls!",
                 successText: "Yes! Bubble tea is my absolute favorite! (+1)",
                 failText: "That's not what I was craving for! (-1)"
             },
@@ -84,6 +97,7 @@ const GAME_DATABASE = {
                 avatar: "👱‍♂️",
                 text: "I want something sour and fruit-flavored!",
                 requiredTags: ["sour"],
+                hintText: "I want something SOUR!",
                 successText: "Great! That tangy fruit flavor is perfect! (+1)",
                 failText: "I asked for something sour! (-1)"
             },
@@ -91,6 +105,7 @@ const GAME_DATABASE = {
                 avatar: "🧒",
                 text: "It's summer! I want a cold sweet treat!",
                 requiredTags: ["cold", "sweet"],
+                hintText: "I want a COLD SWEET treat!",
                 successText: "Yay! Ice cream and cold sweet treats are the best! (+1)",
                 failText: "It's hot outside, I want a cold sweet treat! (-1)"
             }
