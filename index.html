@@ -65,13 +65,19 @@
     </div>
 </div>
 
-<!-- 禮物兌換彈窗 (Modal) -->
+<!-- 簡化版積分兌現彈窗 -->
 <div id="redeem-modal" class="modal-overlay">
     <div class="modal-content">
-        <h2>🎁 Redeem Rewards (積分兌換)</h2>
+        <h2>🎁 Redeem Points (積分兌現)</h2>
         <p>Current Score: <strong id="modal-score">0</strong> Points</p>
-        <div id="rewards-list" class="rewards-list"></div>
-        <button class="close-btn" onclick="game.closeRedeemModal()">Close</button>
+        <p style="font-size: 0.9rem; color: #64748b;">Enter points to redeem with your teacher or parents:</p>
+        
+        <input type="number" id="redeem-input" class="redeem-input" placeholder="Enter points..." min="1">
+        
+        <div class="modal-btn-group">
+            <button class="claim-btn" onclick="game.confirmRedeem()">Confirm Redeem ✅</button>
+            <button class="close-btn" onclick="game.closeRedeemModal()">Cancel</button>
+        </div>
     </div>
 </div>
 
