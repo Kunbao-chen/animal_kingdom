@@ -11,7 +11,10 @@
 <div id="game-container">
     <div class="header">
         <div>🏪 English Diner</div>
-        <div class="score-box">Score: <span id="score">0</span></div>
+        <div class="header-right">
+            <button class="redeem-btn" onclick="game.openRedeemModal()">🎁 Redeem</button>
+            <div class="score-box">Score: <span id="score">0</span></div>
+        </div>
     </div>
 
     <!-- 顧客對話區 -->
@@ -30,7 +33,7 @@
             <div id="options-grid" class="options-grid"></div>
         </div>
 
-        <!-- 步驟 2: 口說區 (僅在選對餐點時顯示) -->
+        <!-- 步驟 2: 口說區 -->
         <div id="step-speaking" class="speaking-area">
             <div class="section-title">Step 2: Read aloud (Listen & Speak)</div>
             <div class="target-sentence">
@@ -62,7 +65,16 @@
     </div>
 </div>
 
-<!-- 載入拆分後的腳本 -->
+<!-- 禮物兌換彈窗 (Modal) -->
+<div id="redeem-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2>🎁 Redeem Rewards (積分兌換)</h2>
+        <p>Current Score: <strong id="modal-score">0</strong> Points</p>
+        <div id="rewards-list" class="rewards-list"></div>
+        <button class="close-btn" onclick="game.closeRedeemModal()">Close</button>
+    </div>
+</div>
+
 <script src="js/data.js"></script>
 <script src="js/app.js"></script>
 
