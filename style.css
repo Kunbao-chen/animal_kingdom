@@ -20,7 +20,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 
 .options-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
 .option-btn { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 10px 12px; font-size: 0.95rem; font-weight: 600; color: #334155; cursor: pointer; transition: all 0.2s; text-align: center; }
-.option-btn:hover:not(:disabled) { border-color: #3b82f6; background-color: #eff6ff; }
+.option-btn.hover:not(:disabled) { border-color: #3b82f6; background-color: #eff6ff; }
 .option-btn.selected { border-color: #2563eb; background-color: #dbeafe; color: #1e40af; }
 .option-btn.wrong-disabled { background-color: #f1f5f9; border-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; text-decoration: line-through; }
 
@@ -57,16 +57,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
     100% { transform: translateY(-5px); }
 }
 
-/* 禮物彈窗樣式 */
+/* 簡化版兌現彈窗樣式 */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; }
 .modal-overlay.active { display: flex; }
-.modal-content { background: white; border-radius: 20px; padding: 25px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+.modal-content { background: white; border-radius: 20px; padding: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 .modal-content h2 { margin-top: 0; color: #1e293b; }
-.rewards-list { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; max-height: 250px; overflow-y: auto; }
-.reward-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
-.reward-info { text-align: left; }
-.reward-title { font-weight: bold; color: #334155; }
-.reward-cost { font-size: 0.85rem; color: #f59e0b; font-weight: bold; }
-.claim-btn { background: #10b981; color: white; border: none; padding: 6px 14px; border-radius: 12px; cursor: pointer; font-weight: bold; }
-.claim-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
-.close-btn { background: #64748b; color: white; border: none; padding: 10px 24px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+.redeem-input { width: 100%; padding: 12px; font-size: 1.1rem; border: 2px solid #cbd5e1; border-radius: 12px; margin: 15px 0; text-align: center; }
+.modal-btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+.claim-btn { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+.close-btn { background: #64748b; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
