@@ -8,6 +8,8 @@ class GameEngine {
         this.selectedItem = null;
         this.targetSentenceText = "";
         this.recognition = null;
+        this.isListening = false; // 紀錄目前是否正在錄音
+        this.speechTimeout = null; // 6秒強制切斷計時器
         
         this.maxAttempts = 3;
         this.currentAttempt = 0;
@@ -30,31 +32,47 @@ class GameEngine {
             this.recognition.maxAlternatives = 1;
 
             this.recognition.onstart = () => {
+                this.isListening = true;
                 const micBtn = document.getElementById("mic-btn");
                 micBtn.classList.add("listening");
-                micBtn.innerText = "🎙️ Listening...";
+                micBtn.innerText = "🛑 Tap to Stop & Check"; // 提示使用者可以再按一次手動停止
                 document.getElementById("recognized-text").innerText = "Listening to your voice...";
+
+                // 🛡️ 防護機制：6 秒後如果還沒自動停止，強制停止並結算
+                clearTimeout(this.speechTimeout);
+                this.speechTimeout = setTimeout(() => {
+                    if (this.isListening) {
+                        console.log("Speech recognition timed out. Stopping automatically.");
+                        this.stopListening();
+                    }
+                }, 6000);
             };
 
             this.recognition.onresult = (event) => {
+                clearTimeout(this.speechTimeout);
                 const speechResult = event.results[0][0].transcript.toLowerCase();
                 document.getElementById("recognized-text").innerText = `You said: "${speechResult}"`;
                 this.verifySpeech(speechResult);
             };
 
             this.recognition.onerror = (event) => {
+                clearTimeout(this.speechTimeout);
                 console.error("Speech recognition error:", event.error);
-                document.getElementById("recognized-text").innerText = "Could not hear clearly, please try again!";
+                if (event.error !== 'no-speech') {
+                    document.getElementById("recognized-text").innerText = "Could not hear clearly, please try again!";
+                }
                 this.resetMicBtn();
             };
 
             this.recognition.onend = () => {
+                clearTimeout(this.speechTimeout);
                 this.resetMicBtn();
             };
         }
     }
 
     resetMicBtn() {
+        this.isListening = false;
         const micBtn = document.getElementById("mic-btn");
         micBtn.classList.remove("listening");
         micBtn.innerText = "🎙️ Tap & Speak Now";
@@ -183,11 +201,31 @@ class GameEngine {
     }
 
     startListening() {
-        if (this.recognition) {
-            window.speechSynthesis.cancel();
-            this.recognition.start();
-        } else {
+        if (!this.recognition) {
             alert("Speech Recognition is not supported or blocked in this browser.");
+            return;
+        }
+
+        // 💡 如果目前正在錄音，再點一次代表手動停止並結算！
+        if (this.isListening) {
+            this.stopListening();
+            return;
+        }
+
+        window.speechSynthesis.cancel();
+        try {
+            this.recognition.start();
+        } catch (e) {
+            console.warn("Recognition already started, restarting...", e);
+            this.recognition.stop();
+            setTimeout(() => this.recognition.start(), 200);
+        }
+    }
+
+    stopListening() {
+        if (this.recognition && this.isListening) {
+            this.recognition.stop();
+            document.getElementById("recognized-text").innerText = "Processing your speech...";
         }
     }
 
