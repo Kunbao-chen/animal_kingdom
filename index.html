@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>English Diner - 語音口說餐廳大廚</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
@@ -65,10 +65,10 @@
     </div>
 </div>
 
-<!-- 簡化版積分兌現彈窗 -->
+<!-- 簡化版積分兌換彈窗 -->
 <div id="redeem-modal" class="modal-overlay">
     <div class="modal-content">
-        <h2>🎁 Redeem Points (積分兌現)</h2>
+        <h2>🎁 Redeem Points (積分兌換)</h2>
         <p>Current Score: <strong id="modal-score">0</strong> Points</p>
         <p style="font-size: 0.9rem; color: #64748b;">Enter points to redeem with your teacher or parents:</p>
         
@@ -81,8 +81,8 @@
     </div>
 </div>
 
-<script src="js/data.js"></script>
-<script src="js/app.js"></script>
+<!-- 關鍵：加上 type="module"，讓瀏覽器安全依序載入 -->
+<script type="module" src="./js/app.js"></script>
 
 </body>
 </html>
