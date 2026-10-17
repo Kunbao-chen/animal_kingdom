@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Diner - 語音口說餐廳大廚</title>
+    <title>English Diner - 語音口說餐廳大廚 (重唸練習版)</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
@@ -27,10 +27,14 @@
         .speaking-area { background: #f1f5f9; border-radius: 16px; padding: 18px; text-align: center; display: none; }
         .target-sentence { font-size: 1.25rem; font-weight: bold; color: #1d4ed8; margin-bottom: 15px; }
         
-        .mic-btn { background: #ef4444; color: white; border: none; padding: 12px 24px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4); transition: transform 0.1s; }
-        .mic-btn:active { transform: scale(0.95); }
+        .btn-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+        
+        .mic-btn { background: #ef4444; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4); }
         .mic-btn.listening { background: #22c55e; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4); animation: pulse 1.5s infinite; }
         
+        .retry-btn { background: #f59e0b; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4); }
+        .retry-btn.visible { display: inline-flex; }
+
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -38,9 +42,19 @@
         }
 
         .recognized-text { margin-top: 12px; font-size: 1rem; color: #475569; min-height: 24px; font-style: italic; }
+        .attempts-left { font-size: 0.85rem; color: #d97706; font-weight: bold; margin-top: 4px; }
         .feedback { text-align: center; font-size: 1.1rem; font-weight: bold; margin-top: 15px; min-height: 28px; }
         .success { color: #16a34a; }
         .error { color: #dc2626; }
+
+        .next-btn-container { text-align: center; margin-top: 20px; }
+        .next-btn { background: #3b82f6; color: white; border: none; padding: 14px 32px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); display: none; margin: 0 auto; }
+        .next-btn.visible { display: inline-block; animation: bounce 1s infinite alternate; }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
     </style>
 </head>
 <body>
@@ -61,49 +75,62 @@
     </div>
 
     <div class="interactive-section">
-        <!-- 步驟 1: 選擇點心/飲料 -->
+        <!-- 步驟 1: 選擇餐點 -->
         <div id="step-menu">
             <div class="section-title">Step 1: Choose a menu item for customer</div>
             <div id="options-grid" class="options-grid"></div>
         </div>
 
-        <!-- 步驟 2: 口說覆誦句子 -->
+        <!-- 步驟 2: 口說區 -->
         <div id="step-speaking" class="speaking-area">
-            <div class="section-title">Step 2: Read the sentence aloud into mic</div>
-            <div id="target-sentence" class="target-sentence">"How about..."</div>
+            <div class="section-title">Step 2: Read aloud (Listen & Speak)</div>
+            <div class="target-sentence">
+                <span id="target-sentence">"How about..."</span>
+                <button class="audio-btn" onclick="game.speakTargetSentence()">🔊</button>
+            </div>
             
-            <button id="mic-btn" class="mic-btn" onclick="game.startListening()">
-                🎙️ Tap & Speak Now
-            </button>
+            <div class="btn-group">
+                <button id="mic-btn" class="mic-btn" onclick="game.startListening()">
+                    🎙️ Tap & Speak Now
+                </button>
+                <button id="retry-btn" class="retry-btn" onclick="game.retrySpeaking()">
+                    🔄 Try Again
+                </button>
+            </div>
+
             <div id="recognized-text" class="recognized-text"></div>
+            <div id="attempts-left" class="attempts-left"></div>
         </div>
 
         <!-- 結果與回饋 -->
         <div id="feedback" class="feedback"></div>
+
+        <div class="next-btn-container">
+            <button id="next-btn" class="next-btn" onclick="game.nextCustomer()">
+                Next Customer ➡️
+            </button>
+        </div>
     </div>
 </div>
 
 <script>
-// ==========================================
-// 1. 遊戲資料庫 (支持擴充)
-// ==========================================
 const GAME_DATABASE = {
     restaurant: {
         title: "🏪 English Diner",
         menu: [
-            { id: "ice_coffee", name: "Iced Coffee", tags: ["cold", "drink"] },
-            { id: "hot_coffee", name: "Hot Coffee",  tags: ["hot", "drink"] },
-            { id: "ice_tea",    name: "Iced Tea",     tags: ["cold", "drink"] },
-            { id: "hot_tea",    name: "Hot Tea",     tags: ["hot", "drink"] },
-            { id: "hamburger",  name: "Hamburger",   tags: ["meal"] },
-            { id: "apple_juice",name: "Apple Juice", tags: ["cold", "drink"] }
+            { id: "iced_coffee", name: "Iced Coffee", keywords: ["iced", "coffee"], tags: ["cold", "drink"] },
+            { id: "hot_coffee",  name: "Hot Coffee",  keywords: ["hot", "coffee"],  tags: ["hot", "drink"] },
+            { id: "iced_tea",    name: "Iced Tea",    keywords: ["iced", "tea"],    tags: ["cold", "drink"] },
+            { id: "hot_tea",     name: "Hot Tea",     keywords: ["hot", "tea"],     tags: ["hot", "drink"] },
+            { id: "hamburger",   name: "Hamburger",   keywords: ["hamburger"],   tags: ["meal"] },
+            { id: "apple_juice", name: "Apple Juice", keywords: ["apple", "juice"], tags: ["cold", "drink"] }
         ],
         customers: [
             {
                 avatar: "🧔",
                 text: "It is so hot today! I want some cold drink.",
                 requiredTags: ["cold", "drink"],
-                successText: "Yummy! That's cold and sweet! (+1)",
+                successText: "Yummy! That's cold and refreshing! (+1)",
                 failText: "Oh no... That's not what I asked for! (-1)"
             },
             {
@@ -124,9 +151,6 @@ const GAME_DATABASE = {
     }
 };
 
-// ==========================================
-// 2. 核心遊戲引擎 (含 TTS 與 STT 語音辨識)
-// ==========================================
 class GameEngine {
     constructor() {
         this.score = 0;
@@ -135,6 +159,9 @@ class GameEngine {
         this.selectedItem = null;
         this.targetSentenceText = "";
         this.recognition = null;
+        
+        this.maxAttempts = 3;    // 允許重唸上限次數
+        this.currentAttempt = 0; // 當前嘗試次數
 
         this.initSpeechRecognition();
     }
@@ -143,12 +170,11 @@ class GameEngine {
         this.loadTheme(this.currentTheme);
     }
 
-    // 初始化 Web Speech API 語音辨識
     initSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             this.recognition = new SpeechRecognition();
-            this.recognition.lang = 'en-US'; // 設定為美式英文辨識
+            this.recognition.lang = 'en-US';
             this.recognition.interimResults = false;
             this.recognition.maxAlternatives = 1;
 
@@ -207,49 +233,64 @@ class GameEngine {
         const theme = GAME_DATABASE[this.currentTheme];
         const randomIndex = Math.floor(Math.random() * theme.customers.length);
         this.currentCustomer = theme.customers[randomIndex];
+        this.currentAttempt = 0; // 重置嘗試次數
         
         document.getElementById("npc-avatar").innerText = this.currentCustomer.avatar;
         document.getElementById("speech-text").innerText = `"${this.currentCustomer.text}"`;
         document.getElementById("feedback").innerText = "";
         document.getElementById("recognized-text").innerText = "";
+        document.getElementById("attempts-left").innerText = "";
         
-        // 重置介面狀態
         document.getElementById("step-speaking").style.display = "none";
-        document.querySelectorAll(".option-btn").forEach(btn => btn.classList.remove("selected"));
+        document.getElementById("retry-btn").classList.remove("visible");
+        document.getElementById("next-btn").classList.remove("visible");
+        document.getElementById("mic-btn").style.display = "inline-flex";
 
-        // 顧客自動念出需求的語音 (TTS)
+        document.querySelectorAll(".option-btn").forEach(btn => {
+            btn.classList.remove("selected");
+            btn.disabled = false;
+        });
+
         setTimeout(() => this.speakCustomerText(), 500);
     }
 
-    // 顧客 TTS 語音朗讀
     speakCustomerText() {
-        window.speechSynthesis.cancel(); // 停止先前的聲音
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(this.currentCustomer.text);
         utterance.lang = 'en-US';
-        utterance.rate = 0.9; // 比一般語速稍微慢一點點，適合小學生
+        utterance.rate = 0.9;
         window.speechSynthesis.speak(utterance);
     }
 
-    // 步驟 1: 玩家選取餐點選項 ➔ 生成完整句型
+    speakTargetSentence() {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(this.targetSentenceText);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.85; // 再放慢一點讓學生聽清楚
+        window.speechSynthesis.speak(utterance);
+    }
+
     selectMenuItem(item, btnElement) {
         this.selectedItem = item;
+        this.currentAttempt = 0; // 重置此項目的重唸次數
+        
         document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
         btnElement.classList.add("selected");
 
-        // 組成完整回應句型 (例如：How about some Iced Coffee?)
         this.targetSentenceText = `How about some ${item.name}?`;
         
         document.getElementById("target-sentence").innerText = `"${this.targetSentenceText}"`;
         document.getElementById("step-speaking").style.display = "block";
         document.getElementById("feedback").innerText = "";
+        document.getElementById("attempts-left").innerText = `Attempts left: ${this.maxAttempts}`;
+        
+        document.getElementById("retry-btn").classList.remove("visible");
+        document.getElementById("mic-btn").style.display = "inline-flex";
+        document.getElementById("next-btn").classList.remove("visible");
 
-        // 示範朗讀該句子給玩家聽
-        const utterance = new SpeechSynthesisUtterance(this.targetSentenceText);
-        utterance.lang = 'en-US';
-        window.speechSynthesis.speak(utterance);
+        this.speakTargetSentence();
     }
 
-    // 步驟 2: 啟動麥克風錄音
     startListening() {
         if (this.recognition) {
             window.speechSynthesis.cancel();
@@ -257,53 +298,73 @@ class GameEngine {
         }
     }
 
-    // 驗證語音比對與邏輯比對
+    // 重唸邏輯
+    retrySpeaking() {
+        document.getElementById("feedback").innerText = "";
+        document.getElementById("retry-btn").classList.remove("visible");
+        document.getElementById("mic-btn").style.display = "inline-flex";
+        this.speakTargetSentence(); // 再次示範發音
+    }
+
     verifySpeech(spokenText) {
-        // 1. 檢查餐點是否符合顧客需求
+        this.currentAttempt++;
         const isMenuMatch = this.currentCustomer.requiredTags.every(tag => this.selectedItem.tags.includes(tag));
-        
-        // 2. 檢查口說內容是否包含關鍵單字 (例如是否有念出 "iced coffee" 或核心動詞)
-        const keyword = this.selectedItem.name.toLowerCase();
-        const isSpeechMatch = spokenText.includes(keyword) || spokenText.includes("how about");
+        const allKeywordsPresent = this.selectedItem.keywords.every(keyword => spokenText.includes(keyword));
 
         const feedbackEl = document.getElementById("feedback");
+        const remainingAttempts = this.maxAttempts - this.currentAttempt;
 
-        if (isMenuMatch && isSpeechMatch) {
-            // 對：+1 分
+        if (isMenuMatch && allKeywordsPresent) {
+            // 答對：+1 分，完成此題
             this.score += 1;
-            feedbackEl.innerText = " Correct! " + this.currentCustomer.successText;
+            feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successText;
             feedbackEl.className = "feedback success";
             
-            // 顧客講話回饋
-            const happyUtterance = new SpeechSynthesisUtterance(this.currentCustomer.successText);
+            const happyUtterance = new SpeechSynthesisUtterance("Yummy! Thank you!");
             happyUtterance.lang = 'en-US';
             window.speechSynthesis.speak(happyUtterance);
 
-        } else {
-            // 錯：-1 分
-            this.score -= 1;
-            let errorMsg = "";
-            if (!isMenuMatch) {
-                errorMsg = " Wrong item! " + this.currentCustomer.failText;
-            } else {
-                errorMsg = " Pronunciation check failed. Please speak clearly!";
-            }
-            feedbackEl.innerText = errorMsg;
-            feedbackEl.className = "feedback error";
+            this.finishRound();
 
-            const sadUtterance = new SpeechSynthesisUtterance("No, thank you.");
-            sadUtterance.lang = 'en-US';
-            window.speechSynthesis.speak(sadUtterance);
+        } else if (!isMenuMatch) {
+            // 選錯餐點：無法靠重唸解決，直接扣分結算
+            this.score -= 1;
+            feedbackEl.innerText = "❌ Wrong item! " + this.currentCustomer.failText;
+            feedbackEl.className = "feedback error";
+            this.finishRound();
+
+        } else {
+            // 唸不順 / 唸錯關鍵字：給予重唸機會
+            if (remainingAttempts > 0) {
+                feedbackEl.innerText = `⚠️ Almost there! Try saying "${this.selectedItem.name}" clearly.`;
+                feedbackEl.className = "feedback error";
+                document.getElementById("attempts-left").innerText = `Attempts left: ${remainingAttempts}`;
+                
+                // 隱藏一般錄音按鈕，顯示「Try Again」引導按鈕
+                document.getElementById("mic-btn").style.display = "none";
+                document.getElementById("retry-btn").classList.add("visible");
+            } else {
+                // 重唸 3 次均失敗：扣 1 分結算
+                this.score -= 1;
+                feedbackEl.innerText = `❌ Out of tries! The correct phrase is "${this.selectedItem.name}". (-1)`;
+                feedbackEl.className = "feedback error";
+                this.finishRound();
+            }
         }
 
         document.getElementById("score").innerText = this.score;
+    }
 
-        // 2.5 秒後跳下一位顧客
-        setTimeout(() => this.nextCustomer(), 2800);
+    // 結束本輪，顯示「Next Customer」按鈕並鎖定操作
+    finishRound() {
+        document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
+        document.getElementById("mic-btn").style.display = "none";
+        document.getElementById("retry-btn").classList.remove("visible");
+        document.getElementById("attempts-left").innerText = "";
+        document.getElementById("next-btn").classList.add("visible");
     }
 }
 
-// 啟動遊戲
 const game = new GameEngine();
 window.onload = () => game.init();
 </script>
