@@ -1,4 +1,4 @@
-const GAME_DATABASE = {
+export const GAME_DATABASE = {
     restaurant: {
         title: "🏪 English Diner",
         
@@ -8,20 +8,13 @@ const GAME_DATABASE = {
             "Here is your {item}."
         ],
 
-        // 🎁 可兌換的禮物清單
-        rewards: [
-            { id: "sticker", name: "🍦 Ice Cream Voucher", cost: 5, desc: "A free ice cream card!" },
-            { id: "zoo_ticket", name: "🦁 Zoo Ticket", cost: 10, desc: "Unlock English Zoo Theme!" },
-            { id: "chef_hat", name: "👨‍🍳 Master Chef Hat", cost: 15, desc: "Special Gold Chef Badge!" }
-        ],
-
         menu: [
             // 🥤 飲料類
             { id: "iced_coffee",  name: "Iced Coffee",     article: "some", keywords: ["iced", "coffee"],   tags: ["cold", "drink"] },
             { id: "hot_coffee",   name: "Hot Coffee",      article: "some", keywords: ["hot", "coffee"],    tags: ["hot", "drink"] },
             { id: "iced_tea",     name: "Iced Tea",        article: "some", keywords: ["iced", "tea"],      tags: ["cold", "drink"] },
             { id: "hot_tea",      name: "Hot Tea",         article: "some", keywords: ["hot", "tea"],       tags: ["hot", "drink"] },
-            { id: "apple_juice",  name: "Apple Juice",     article: "some", keywords: ["apple", "juice"],   tags: ["cold", "drink", "sweet"] },
+            { id: "apple_juice",  name: "Apple Juice",     article: "some", keywords: ["apple", "juice"],   tags: ["cold", "drink", "sweet", "sour"] },
             { id: "orange_juice", name: "Orange Juice",    article: "some", keywords: ["orange", "juice"],  tags: ["cold", "drink", "sour"] },
             { id: "milk",         name: "Milk",            article: "some", keywords: ["milk"],             tags: ["cold", "drink"] },
             { id: "bubble_tea",   name: "Bubble Tea",      article: "some", keywords: ["bubble", "tea"],    tags: ["cold", "drink", "sweet"] },
@@ -41,7 +34,7 @@ const GAME_DATABASE = {
             { id: "chocolate_cake",name: "Chocolate Cake", article: "some", keywords: ["chocolate", "cake"],tags: ["dessert", "sweet"] },
             { id: "cookie",       name: "Cookie",          article: "a",    keywords: ["cookie"],           tags: ["dessert", "sweet"] },
             { id: "donut",        name: "Donut",           article: "a",    keywords: ["donut"],            tags: ["dessert", "sweet"] },
-            { id: "fruit_salad",  name: "Fruit Salad",     article: "some", keywords: ["fruit", "salad"],   tags: ["dessert", "cold", "sour"] }
+            { id: "fruit_salad",  name: "Fruit Salad",     article: "some", keywords: ["fruit", "salad"],   tags: ["dessert", "cold", "sour", "sweet"] }
         ],
 
         customers: [
