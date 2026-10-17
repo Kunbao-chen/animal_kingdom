@@ -2,110 +2,191 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>English Diner & Adventure - 英文學習小遊戲</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Diner - 語音口說餐廳大廚</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        #game-container { width: 600px; background: white; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); overflow: hidden; }
-        .header { background: #4A90E2; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
-        .score-board { font-size: 1.2rem; font-weight: bold; }
-        .npc-area { padding: 30px 20px; background: #eef6ff; text-align: center; border-bottom: 2px solid #e0e0e0; }
-        .npc-avatar { font-size: 60px; margin-bottom: 10px; }
-        .speech-bubble { background: white; padding: 15px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.05); font-size: 1.1rem; color: #333; }
-        .menu-area { padding: 20px; }
-        .menu-title { font-size: 1rem; color: #666; margin-bottom: 10px; }
-        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .option-btn { background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 10px; padding: 12px; font-size: 1rem; cursor: pointer; transition: all 0.2s; text-align: left; }
-        .option-btn:hover { background: #e9ecef; border-color: #4A90E2; }
-        .feedback { text-align: center; padding: 10px; font-weight: bold; height: 24px; margin-top: 10px; }
-        .success { color: #2e7d32; }
-        .error { color: #c62828; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        #game-container { width: 100%; max-width: 650px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: #3b82f6; color: white; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: bold; }
+        .score-box { background: rgba(255, 255, 255, 0.2); padding: 6px 16px; border-radius: 20px; }
+        
+        .npc-section { background: #f8fafc; padding: 25px; text-align: center; border-bottom: 2px dashed #e2e8f0; position: relative; }
+        .npc-avatar { font-size: 70px; margin-bottom: 10px; line-height: 1; }
+        .speech-bubble { background: white; border: 2px solid #cbd5e1; border-radius: 16px; padding: 15px 20px; display: inline-block; max-width: 85%; font-size: 1.2rem; color: #1e293b; box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: relative; }
+        .audio-btn { background: #3b82f6; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; margin-left: 8px; vertical-align: middle; font-size: 0.9rem; }
+        
+        .interactive-section { padding: 24px; }
+        .section-title { font-size: 0.95rem; color: #64748b; font-weight: bold; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+        .option-btn { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; font-size: 1.05rem; font-weight: 600; color: #334155; cursor: pointer; transition: all 0.2s; text-align: left; }
+        .option-btn:hover { border-color: #3b82f6; background-color: #eff6ff; }
+        .option-btn.selected { border-color: #2563eb; background-color: #dbeafe; color: #1e40af; }
+
+        .speaking-area { background: #f1f5f9; border-radius: 16px; padding: 18px; text-align: center; display: none; }
+        .target-sentence { font-size: 1.25rem; font-weight: bold; color: #1d4ed8; margin-bottom: 15px; }
+        
+        .mic-btn { background: #ef4444; color: white; border: none; padding: 12px 24px; border-radius: 30px; font-size: 1.1rem; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4); transition: transform 0.1s; }
+        .mic-btn:active { transform: scale(0.95); }
+        .mic-btn.listening { background: #22c55e; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4); animation: pulse 1.5s infinite; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .recognized-text { margin-top: 12px; font-size: 1rem; color: #475569; min-height: 24px; font-style: italic; }
+        .feedback { text-align: center; font-size: 1.1rem; font-weight: bold; margin-top: 15px; min-height: 28px; }
+        .success { color: #16a34a; }
+        .error { color: #dc2626; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!-- 頂部資訊 -->
     <div class="header">
-        <div id="theme-title">🏪 English Diner</div>
-        <div class="score-board">Score: <span id="score">0</span></div>
+        <div>🏪 English Diner</div>
+        <div class="score-box">Score: <span id="score">0</span></div>
     </div>
 
-    <!-- NPC 顧客區 -->
-    <div class="npc-area">
+    <!-- 顧客對話區 -->
+    <div class="npc-section">
         <div id="npc-avatar" class="npc-avatar">🧔</div>
-        <div id="speech-bubble" class="speech-bubble">Loading...</div>
+        <div class="speech-bubble">
+            <span id="speech-text">Loading...</span>
+            <button class="audio-btn" onclick="game.speakCustomerText()">🔊</button>
+        </div>
     </div>
 
-    <!-- 操作菜單區 -->
-    <div class="menu-area">
-        <div class="menu-title">推薦餐點給顧客 (Recommend to Customer)：</div>
-        <div id="options-grid" class="options-grid"></div>
+    <div class="interactive-section">
+        <!-- 步驟 1: 選擇點心/飲料 -->
+        <div id="step-menu">
+            <div class="section-title">Step 1: Choose a menu item for customer</div>
+            <div id="options-grid" class="options-grid"></div>
+        </div>
+
+        <!-- 步驟 2: 口說覆誦句子 -->
+        <div id="step-speaking" class="speaking-area">
+            <div class="section-title">Step 2: Read the sentence aloud into mic</div>
+            <div id="target-sentence" class="target-sentence">"How about..."</div>
+            
+            <button id="mic-btn" class="mic-btn" onclick="game.startListening()">
+                🎙️ Tap & Speak Now
+            </button>
+            <div id="recognized-text" class="recognized-text"></div>
+        </div>
+
+        <!-- 結果與回饋 -->
         <div id="feedback" class="feedback"></div>
     </div>
 </div>
 
 <script>
 // ==========================================
-// 1. 未來可擴充的主題資料庫 (Themes Database)
+// 1. 遊戲資料庫 (支持擴充)
 // ==========================================
 const GAME_DATABASE = {
-    // 【主題一：餐廳】(現階段進行)
     restaurant: {
         title: "🏪 English Diner",
         menu: [
             { id: "ice_coffee", name: "Iced Coffee", tags: ["cold", "drink"] },
-            { id: "hot_coffee", name: "Hot Coffee", tags: ["hot", "drink"] },
-            { id: "ice_tea",    name: "Iced Tea",    tags: ["cold", "drink"] },
-            { id: "hot_tea",    name: "Hot Tea",    tags: ["hot", "drink"] },
-            { id: "hamburger",  name: "Hamburger",  tags: ["meal"] }
+            { id: "hot_coffee", name: "Hot Coffee",  tags: ["hot", "drink"] },
+            { id: "ice_tea",    name: "Iced Tea",     tags: ["cold", "drink"] },
+            { id: "hot_tea",    name: "Hot Tea",     tags: ["hot", "drink"] },
+            { id: "hamburger",  name: "Hamburger",   tags: ["meal"] },
+            { id: "apple_juice",name: "Apple Juice", tags: ["cold", "drink"] }
         ],
         customers: [
             {
+                avatar: "🧔",
                 text: "It is so hot today! I want some cold drink.",
                 requiredTags: ["cold", "drink"],
-                successText: "Yummy! This iced drink is so refreshing! (+2)",
-                failText: "Oh no... It is too hot for this! (-1)"
+                successText: "Yummy! That's cold and sweet! (+1)",
+                failText: "Oh no... That's not what I asked for! (-1)"
             },
             {
+                avatar: "👩",
                 text: "I am freezing! Can I have a hot drink?",
                 requiredTags: ["hot", "drink"],
-                successText: "Thank you! This keeps me warm! (+2)",
+                successText: "Thank you! This hot drink keeps me warm! (+1)",
                 failText: "Brrr! I asked for a HOT drink! (-1)"
             },
             {
+                avatar: "👦",
                 text: "I am so hungry! I want a big meal.",
                 requiredTags: ["meal"],
-                successText: "Delicious! Exactly what I needed! (+2)",
+                successText: "Delicious! Exactly what I needed! (+1)",
                 failText: "I'm hungry, drinks won't fill me up! (-1)"
             }
         ]
-    },
-
-    // 【主題二：動物園】(預留框架，未來解鎖)
-    zoo: {
-        title: "🦁 English Zoo",
-        menu: [],
-        customers: []
     }
 };
 
 // ==========================================
-// 2. 核心遊戲引擎 (Game Engine)
+// 2. 核心遊戲引擎 (含 TTS 與 STT 語音辨識)
 // ==========================================
 class GameEngine {
     constructor() {
         this.score = 0;
-        this.currentTheme = "restaurant"; // 預設執行餐廳主題
+        this.currentTheme = "restaurant";
         this.currentCustomer = null;
+        this.selectedItem = null;
+        this.targetSentenceText = "";
+        this.recognition = null;
+
+        this.initSpeechRecognition();
     }
 
     init() {
         this.loadTheme(this.currentTheme);
     }
 
+    // 初始化 Web Speech API 語音辨識
+    initSpeechRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'en-US'; // 設定為美式英文辨識
+            this.recognition.interimResults = false;
+            this.recognition.maxAlternatives = 1;
+
+            this.recognition.onstart = () => {
+                const micBtn = document.getElementById("mic-btn");
+                micBtn.classList.add("listening");
+                micBtn.innerText = "🎙️ Listening...";
+                document.getElementById("recognized-text").innerText = "Listening to your voice...";
+            };
+
+            this.recognition.onresult = (event) => {
+                const speechResult = event.results[0][0].transcript.toLowerCase();
+                document.getElementById("recognized-text").innerText = `You said: "${speechResult}"`;
+                this.verifySpeech(speechResult);
+            };
+
+            this.recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                document.getElementById("recognized-text").innerText = "Could not hear clearly, please try again!";
+                this.resetMicBtn();
+            };
+
+            this.recognition.onend = () => {
+                this.resetMicBtn();
+            };
+        } else {
+            alert("Your browser does not support Speech Recognition. Please use Google Chrome or Microsoft Edge.");
+        }
+    }
+
+    resetMicBtn() {
+        const micBtn = document.getElementById("mic-btn");
+        micBtn.classList.remove("listening");
+        micBtn.innerText = "🎙️ Tap & Speak Now";
+    }
+
     loadTheme(themeKey) {
         const theme = GAME_DATABASE[themeKey];
-        document.getElementById("theme-title").innerText = theme.title;
         this.renderMenu(theme.menu);
         this.nextCustomer();
     }
@@ -117,7 +198,7 @@ class GameEngine {
             const btn = document.createElement("button");
             btn.className = "option-btn";
             btn.innerText = item.name;
-            btn.onclick = () => this.handleSelection(item);
+            btn.onclick = () => this.selectMenuItem(item, btn);
             grid.appendChild(btn);
         });
     }
@@ -127,35 +208,104 @@ class GameEngine {
         const randomIndex = Math.floor(Math.random() * theme.customers.length);
         this.currentCustomer = theme.customers[randomIndex];
         
-        document.getElementById("speech-bubble").innerText = `"${this.currentCustomer.text}"`;
+        document.getElementById("npc-avatar").innerText = this.currentCustomer.avatar;
+        document.getElementById("speech-text").innerText = `"${this.currentCustomer.text}"`;
         document.getElementById("feedback").innerText = "";
+        document.getElementById("recognized-text").innerText = "";
+        
+        // 重置介面狀態
+        document.getElementById("step-speaking").style.display = "none";
+        document.querySelectorAll(".option-btn").forEach(btn => btn.classList.remove("selected"));
+
+        // 顧客自動念出需求的語音 (TTS)
+        setTimeout(() => this.speakCustomerText(), 500);
     }
 
-    handleSelection(selectedItem) {
-        // 比對 selectedItem 的 tags 是否包含顧客要求的全部 requiredTags
-        const isMatch = this.currentCustomer.requiredTags.every(tag => selectedItem.tags.includes(tag));
+    // 顧客 TTS 語音朗讀
+    speakCustomerText() {
+        window.speechSynthesis.cancel(); // 停止先前的聲音
+        const utterance = new SpeechSynthesisUtterance(this.currentCustomer.text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9; // 比一般語速稍微慢一點點，適合小學生
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 步驟 1: 玩家選取餐點選項 ➔ 生成完整句型
+    selectMenuItem(item, btnElement) {
+        this.selectedItem = item;
+        document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
+        btnElement.classList.add("selected");
+
+        // 組成完整回應句型 (例如：How about some Iced Coffee?)
+        this.targetSentenceText = `How about some ${item.name}?`;
+        
+        document.getElementById("target-sentence").innerText = `"${this.targetSentenceText}"`;
+        document.getElementById("step-speaking").style.display = "block";
+        document.getElementById("feedback").innerText = "";
+
+        // 示範朗讀該句子給玩家聽
+        const utterance = new SpeechSynthesisUtterance(this.targetSentenceText);
+        utterance.lang = 'en-US';
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 步驟 2: 啟動麥克風錄音
+    startListening() {
+        if (this.recognition) {
+            window.speechSynthesis.cancel();
+            this.recognition.start();
+        }
+    }
+
+    // 驗證語音比對與邏輯比對
+    verifySpeech(spokenText) {
+        // 1. 檢查餐點是否符合顧客需求
+        const isMenuMatch = this.currentCustomer.requiredTags.every(tag => this.selectedItem.tags.includes(tag));
+        
+        // 2. 檢查口說內容是否包含關鍵單字 (例如是否有念出 "iced coffee" 或核心動詞)
+        const keyword = this.selectedItem.name.toLowerCase();
+        const isSpeechMatch = spokenText.includes(keyword) || spokenText.includes("how about");
+
         const feedbackEl = document.getElementById("feedback");
 
-        if (isMatch) {
-            this.score += 2;
-            feedbackEl.innerText = this.currentCustomer.successText;
+        if (isMenuMatch && isSpeechMatch) {
+            // 對：+1 分
+            this.score += 1;
+            feedbackEl.innerText = " Correct! " + this.currentCustomer.successText;
             feedbackEl.className = "feedback success";
+            
+            // 顧客講話回饋
+            const happyUtterance = new SpeechSynthesisUtterance(this.currentCustomer.successText);
+            happyUtterance.lang = 'en-US';
+            window.speechSynthesis.speak(happyUtterance);
+
         } else {
+            // 錯：-1 分
             this.score -= 1;
-            feedbackEl.innerText = this.currentCustomer.failText;
+            let errorMsg = "";
+            if (!isMenuMatch) {
+                errorMsg = " Wrong item! " + this.currentCustomer.failText;
+            } else {
+                errorMsg = " Pronunciation check failed. Please speak clearly!";
+            }
+            feedbackEl.innerText = errorMsg;
             feedbackEl.className = "feedback error";
+
+            const sadUtterance = new SpeechSynthesisUtterance("No, thank you.");
+            sadUtterance.lang = 'en-US';
+            window.speechSynthesis.speak(sadUtterance);
         }
 
         document.getElementById("score").innerText = this.score;
 
-        // 1.5 秒後換下一位顧客
-        setTimeout(() => this.nextCustomer(), 1800);
+        // 2.5 秒後跳下一位顧客
+        setTimeout(() => this.nextCustomer(), 2800);
     }
 }
 
 // 啟動遊戲
 const game = new GameEngine();
-game.init();
+window.onload = () => game.init();
 </script>
 
 </body>
