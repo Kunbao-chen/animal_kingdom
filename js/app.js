@@ -9,6 +9,7 @@ class GameEngine {
         
         this.maxAttempts = 3;
         this.currentAttempt = 0;
+        this.menuSelectionAttempts = 0; // 點餐選錯的重選次數紀錄
         this.isInitialized = false;
 
         this.initSpeechRecognition();
@@ -69,6 +70,7 @@ class GameEngine {
         menuItems.forEach(item => {
             const btn = document.createElement("button");
             btn.className = "option-btn";
+            btn.id = `menu-btn-${item.id}`;
             btn.innerText = item.name;
             btn.onclick = () => this.selectMenuItem(item, btn);
             grid.appendChild(btn);
@@ -80,6 +82,7 @@ class GameEngine {
         const randomIndex = Math.floor(Math.random() * theme.customers.length);
         this.currentCustomer = theme.customers[randomIndex];
         this.currentAttempt = 0;
+        this.menuSelectionAttempts = 0; // 重置點餐試錯次數
         
         document.getElementById("npc-avatar").innerText = this.currentCustomer.avatar;
         document.getElementById("speech-text").innerText = `"${this.currentCustomer.text}"`;
@@ -93,7 +96,7 @@ class GameEngine {
         document.getElementById("mic-btn").style.display = "inline-flex";
 
         document.querySelectorAll(".option-btn").forEach(btn => {
-            btn.classList.remove("selected");
+            btn.classList.remove("selected", "wrong-disabled");
             btn.disabled = false;
         });
 
@@ -116,7 +119,7 @@ class GameEngine {
         window.speechSynthesis.speak(utterance);
     }
 
-    // 💡 關鍵改動：點選餐點時「即時檢查屬性」
+    // 💡 點選餐點：含「一次重選提示」機制
     selectMenuItem(item, btnElement) {
         this.selectedItem = item;
         this.currentAttempt = 0;
@@ -124,31 +127,44 @@ class GameEngine {
         document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
         btnElement.classList.add("selected");
 
-        // 檢查餐點是否滿足顧客的 requiredTags
         const isMenuMatch = this.currentCustomer.requiredTags.every(tag => item.tags.includes(tag));
-
         const feedbackEl = document.getElementById("feedback");
 
         if (!isMenuMatch) {
-            // ❌ 第一時間發現點錯：直接扣 1 分，給予失敗語音，阻擋進入 Step 2 口說！
-            this.score -= 1;
-            document.getElementById("score").innerText = this.score;
+            this.menuSelectionAttempts++;
 
-            feedbackEl.innerText = "❌ Wrong item! " + this.currentCustomer.failText;
-            feedbackEl.className = "feedback error";
+            if (this.menuSelectionAttempts === 1) {
+                // 第一次選錯：給予提示，不扣分，允許重選一次！
+                btnElement.classList.add("wrong-disabled");
+                btnElement.disabled = true;
 
-            // 顧客講話回應
-            const sadUtterance = new SpeechSynthesisUtterance(this.currentCustomer.failText);
-            sadUtterance.lang = 'en-US';
-            window.speechSynthesis.speak(sadUtterance);
+                const hint = this.currentCustomer.hintText || "Try another choice!";
+                feedbackEl.innerText = `⚠️ Incorrect! Hint: "${hint}" Try picking another item!`;
+                feedbackEl.className = "feedback warning";
 
-            // 鎖定選單並顯示「Next Customer」按鈕
-            document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
-            document.getElementById("step-speaking").style.display = "none";
-            document.getElementById("next-btn").classList.add("visible");
+                const hintSpeech = new SpeechSynthesisUtterance("Not quite! " + hint);
+                hintSpeech.lang = 'en-US';
+                window.speechSynthesis.speak(hintSpeech);
+
+            } else {
+                // 第二次依然選錯：扣 1 分，結算換下一題
+                this.score -= 1;
+                document.getElementById("score").innerText = this.score;
+
+                feedbackEl.innerText = "❌ Wrong item again! " + this.currentCustomer.failText;
+                feedbackEl.className = "feedback error";
+
+                const sadUtterance = new SpeechSynthesisUtterance(this.currentCustomer.failText);
+                sadUtterance.lang = 'en-US';
+                window.speechSynthesis.speak(sadUtterance);
+
+                document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
+                document.getElementById("step-speaking").style.display = "none";
+                document.getElementById("next-btn").classList.add("visible");
+            }
 
         } else {
-            // ✅ 點對餐點：進入 Step 2 口說階段，朗讀英文推薦句
+            // ✅ 選對餐點：進入 Step 2 口說階段
             feedbackEl.innerText = "";
             const templates = GAME_DATABASE.restaurant.sentenceTemplates;
             const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
@@ -172,8 +188,6 @@ class GameEngine {
         if (this.recognition) {
             window.speechSynthesis.cancel();
             this.recognition.start();
-        } else {
-            alert("Speech Recognition is not supported or blocked in this browser.");
         }
     }
 
@@ -227,6 +241,48 @@ class GameEngine {
         document.getElementById("retry-btn").classList.remove("visible");
         document.getElementById("attempts-left").innerText = "";
         document.getElementById("next-btn").classList.add("visible");
+    }
+
+    // 🎁 積分兌換 Modal 邏輯
+    openRedeemModal() {
+        document.getElementById("modal-score").innerText = this.score;
+        const rewardsContainer = document.getElementById("rewards-list");
+        rewardsContainer.innerHTML = "";
+
+        const rewards = GAME_DATABASE.restaurant.rewards;
+        rewards.forEach(reward => {
+            const itemDiv = document.createElement("div");
+            itemDiv.className = "reward-item";
+            
+            const canAfford = this.score >= reward.cost;
+
+            itemDiv.innerHTML = `
+                <div class="reward-info">
+                    <div class="reward-title">${reward.name}</div>
+                    <div class="reward-cost">Cost: ${reward.cost} Points</div>
+                </div>
+                <button class="claim-btn" ${canAfford ? '' : 'disabled'} onclick="game.claimReward(${reward.cost}, '${reward.name}')">
+                    ${canAfford ? 'Claim 🎁' : 'Need Points'}
+                </button>
+            `;
+            rewardsContainer.appendChild(itemDiv);
+        });
+
+        document.getElementById("redeem-modal").classList.add("active");
+    }
+
+    closeRedeemModal() {
+        document.getElementById("redeem-modal").classList.remove("active");
+    }
+
+    claimReward(cost, rewardName) {
+        if (this.score >= cost) {
+            this.score -= cost;
+            document.getElementById("score").innerText = this.score;
+            document.getElementById("modal-score").innerText = this.score;
+            alert(`🎉 Congratulations! You successfully redeemed: "${rewardName}"!`);
+            this.openRedeemModal(); // 刷新對換選單
+        }
     }
 }
 
