@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>English Diner - 語音口說餐廳大廚 (豐富生活句型版)</title>
+    <title>English Diner - 語音口說餐廳大廚 (修復版)</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef2f5; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
@@ -114,14 +114,10 @@
 </div>
 
 <script>
-// ==========================================
-// 擴充版資料庫：包含豐富餐點單字與情境句型
-// ==========================================
 const GAME_DATABASE = {
     restaurant: {
         title: "🏪 English Diner",
         
-        // 可數單數加 'a/an'，不可數/複數加 'some' 的句型產生邏輯
         sentenceTemplates: [
             "How about {item}?",
             "Would you like {item}?",
@@ -129,7 +125,7 @@ const GAME_DATABASE = {
         ],
 
         menu: [
-            // 🥤 飲料類 (Drinks)
+            // 🥤 飲料類
             { id: "iced_coffee",  name: "Iced Coffee",     article: "some", keywords: ["iced", "coffee"],   tags: ["cold", "drink"] },
             { id: "hot_coffee",   name: "Hot Coffee",      article: "some", keywords: ["hot", "coffee"],    tags: ["hot", "drink"] },
             { id: "iced_tea",     name: "Iced Tea",        article: "some", keywords: ["iced", "tea"],      tags: ["cold", "drink"] },
@@ -140,7 +136,7 @@ const GAME_DATABASE = {
             { id: "bubble_tea",   name: "Bubble Tea",      article: "some", keywords: ["bubble", "tea"],    tags: ["cold", "drink", "sweet"] },
             { id: "water",        name: "Water",           article: "some", keywords: ["water"],            tags: ["cold", "drink"] },
 
-            // 🍔 主餐類 (Meals)
+            // 🍔 主餐類
             { id: "hamburger",    name: "Hamburger",       article: "a",    keywords: ["hamburger"],        tags: ["meal", "hot"] },
             { id: "hot_dog",      name: "Hot Dog",         article: "a",    keywords: ["hot", "dog"],       tags: ["meal", "hot"] },
             { id: "pizza",        name: "Pizza",           article: "some", keywords: ["pizza"],            tags: ["meal", "hot"] },
@@ -149,7 +145,7 @@ const GAME_DATABASE = {
             { id: "fried_chicken",name: "Fried Chicken",   article: "some", keywords: ["fried", "chicken"], tags: ["meal", "hot"] },
             { id: "salad",        name: "Salad",           article: "a",    keywords: ["salad"],            tags: ["meal", "cold"] },
 
-            // 🍰 點心與甜點 (Desserts)
+            // 🍰 點心類
             { id: "ice_cream",    name: "Ice Cream",       article: "some", keywords: ["ice", "cream"],     tags: ["dessert", "cold", "sweet"] },
             { id: "chocolate_cake",name: "Chocolate Cake", article: "some", keywords: ["chocolate", "cake"],tags: ["dessert", "sweet"] },
             { id: "cookie",       name: "Cookie",          article: "a",    keywords: ["cookie"],           tags: ["dessert", "sweet"] },
@@ -199,3 +195,252 @@ const GAME_DATABASE = {
                 requiredTags: ["sweet", "drink"],
                 successText: "Yes! Bubble tea is my absolute favorite! (+1)",
                 failText: "That's not what I was craving for! (-1)"
+            },
+            {
+                avatar: "👱‍♂️",
+                text: "I want something sour and fruit-flavored!",
+                requiredTags: ["sour"],
+                successText: "Great! That tangy fruit flavor is perfect! (+1)",
+                failText: "I asked for something sour! (-1)"
+            },
+            {
+                avatar: "🧒",
+                text: "It's summer! I want a cold sweet treat!",
+                requiredTags: ["cold", "sweet"],
+                successText: "Yay! Ice cream and cold sweet treats are the best! (+1)",
+                failText: "It's hot outside, I want a cold sweet treat! (-1)"
+            }
+        ]
+    }
+};
+
+class GameEngine {
+    constructor() {
+        this.score = 0;
+        this.currentTheme = "restaurant";
+        this.currentCustomer = null;
+        this.selectedItem = null;
+        this.targetSentenceText = "";
+        this.recognition = null;
+        
+        this.maxAttempts = 3;
+        this.currentAttempt = 0;
+
+        this.initSpeechRecognition();
+    }
+
+    init() {
+        this.loadTheme(this.currentTheme);
+    }
+
+    initSpeechRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            this.recognition = new SpeechRecognition();
+            this.recognition.lang = 'en-US';
+            this.recognition.interimResults = false;
+            this.recognition.maxAlternatives = 1;
+
+            this.recognition.onstart = () => {
+                const micBtn = document.getElementById("mic-btn");
+                micBtn.classList.add("listening");
+                micBtn.innerText = "🎙️ Listening...";
+                document.getElementById("recognized-text").innerText = "Listening to your voice...";
+            };
+
+            this.recognition.onresult = (event) => {
+                const speechResult = event.results[0][0].transcript.toLowerCase();
+                document.getElementById("recognized-text").innerText = `You said: "${speechResult}"`;
+                this.verifySpeech(speechResult);
+            };
+
+            this.recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                document.getElementById("recognized-text").innerText = "Could not hear clearly, please try again!";
+                this.resetMicBtn();
+            };
+
+            this.recognition.onend = () => {
+                this.resetMicBtn();
+            };
+        }
+    }
+
+    resetMicBtn() {
+        const micBtn = document.getElementById("mic-btn");
+        micBtn.classList.remove("listening");
+        micBtn.innerText = "🎙️ Tap & Speak Now";
+    }
+
+    loadTheme(themeKey) {
+        const theme = GAME_DATABASE[themeKey];
+        this.renderMenu(theme.menu);
+        this.nextCustomer();
+    }
+
+    renderMenu(menuItems) {
+        const grid = document.getElementById("options-grid");
+        grid.innerHTML = "";
+        menuItems.forEach(item => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.innerText = item.name;
+            btn.onclick = () => this.selectMenuItem(item, btn);
+            grid.appendChild(btn);
+        });
+    }
+
+    nextCustomer() {
+        const theme = GAME_DATABASE[this.currentTheme];
+        const randomIndex = Math.floor(Math.random() * theme.customers.length);
+        this.currentCustomer = theme.customers[randomIndex];
+        this.currentAttempt = 0;
+        
+        document.getElementById("npc-avatar").innerText = this.currentCustomer.avatar;
+        document.getElementById("speech-text").innerText = `"${this.currentCustomer.text}"`;
+        document.getElementById("feedback").innerText = "";
+        document.getElementById("recognized-text").innerText = "";
+        document.getElementById("attempts-left").innerText = "";
+        
+        document.getElementById("step-speaking").style.display = "none";
+        document.getElementById("retry-btn").classList.remove("visible");
+        document.getElementById("next-btn").classList.remove("visible");
+        document.getElementById("mic-btn").style.display = "inline-flex";
+
+        document.querySelectorAll(".option-btn").forEach(btn => {
+            btn.classList.remove("selected");
+            btn.disabled = false;
+        });
+
+        setTimeout(() => this.speakCustomerText(), 500);
+    }
+
+    speakCustomerText() {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(this.currentCustomer.text);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    speakTargetSentence() {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(this.targetSentenceText);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.85;
+        window.speechSynthesis.speak(utterance);
+    }
+
+    selectMenuItem(item, btnElement) {
+        this.selectedItem = item;
+        this.currentAttempt = 0;
+        
+        document.querySelectorAll(".option-btn").forEach(b => b.classList.remove("selected"));
+        btnElement.classList.add("selected");
+
+        const templates = GAME_DATABASE.restaurant.sentenceTemplates;
+        const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+        const itemWithArticle = `${item.article} ${item.name}`;
+        
+        this.targetSentenceText = randomTemplate.replace("{item}", itemWithArticle);
+        
+        document.getElementById("target-sentence").innerText = `"${this.targetSentenceText}"`;
+        document.getElementById("step-speaking").style.display = "block";
+        document.getElementById("feedback").innerText = "";
+        document.getElementById("attempts-left").innerText = `Attempts left: ${this.maxAttempts}`;
+        
+        document.getElementById("retry-btn").classList.remove("visible");
+        document.getElementById("mic-btn").style.display = "inline-flex";
+        document.getElementById("next-btn").classList.remove("visible");
+
+        this.speakTargetSentence();
+    }
+
+    startListening() {
+        if (this.recognition) {
+            window.speechSynthesis.cancel();
+            this.recognition.start();
+        } else {
+            alert("Speech Recognition is not supported or blocked in this browser.");
+        }
+    }
+
+    retrySpeaking() {
+        document.getElementById("feedback").innerText = "";
+        document.getElementById("retry-btn").classList.remove("visible");
+        document.getElementById("mic-btn").style.display = "inline-flex";
+        this.speakTargetSentence();
+    }
+
+    verifySpeech(spokenText) {
+        this.currentAttempt++;
+        const isMenuMatch = this.currentCustomer.requiredTags.every(tag => this.selectedItem.tags.includes(tag));
+        const allKeywordsPresent = this.selectedItem.keywords.every(keyword => spokenText.includes(keyword));
+
+        const feedbackEl = document.getElementById("feedback");
+        const remainingAttempts = this.maxAttempts - this.currentAttempt;
+
+        if (isMenuMatch && allKeywordsPresent) {
+            this.score += 1;
+            feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successText;
+            feedbackEl.className = "feedback success";
+            
+            const happyUtterance = new SpeechSynthesisUtterance("Yummy! Thank you!");
+            happyUtterance.lang = 'en-US';
+            window.speechSynthesis.speak(happyUtterance);
+
+            this.finishRound();
+
+        } else if (!isMenuMatch) {
+            this.score -= 1;
+            feedbackEl.innerText = "❌ Wrong item! " + this.currentCustomer.failText;
+            feedbackEl.className = "feedback error";
+            this.finishRound();
+
+        } else {
+            if (remainingAttempts > 0) {
+                feedbackEl.innerText = `⚠️ Almost there! Try saying "${this.selectedItem.name}" clearly.`;
+                feedbackEl.className = "feedback error";
+                document.getElementById("attempts-left").innerText = `Attempts left: ${remainingAttempts}`;
+                
+                document.getElementById("mic-btn").style.display = "none";
+                document.getElementById("retry-btn").classList.add("visible");
+            } else {
+                this.score -= 1;
+                feedbackEl.innerText = `❌ Out of tries! The correct phrase is "${this.selectedItem.name}". (-1)`;
+                feedbackEl.className = "feedback error";
+                this.finishRound();
+            }
+        }
+
+        document.getElementById("score").innerText = this.score;
+    }
+
+    finishRound() {
+        document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
+        document.getElementById("mic-btn").style.display = "none";
+        document.getElementById("retry-btn").classList.remove("visible");
+        document.getElementById("attempts-left").innerText = "";
+        document.getElementById("next-btn").classList.add("visible");
+    }
+}
+
+// 安全的初始化事件綁定
+const game = new GameEngine();
+
+function startApp() {
+    if (!game.isInitialized) {
+        game.init();
+        game.isInitialized = true;
+    }
+}
+
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    setTimeout(startApp, 100);
+} else {
+    document.addEventListener("DOMContentLoaded", startApp);
+}
+</script>
+
+</body>
+</html>
