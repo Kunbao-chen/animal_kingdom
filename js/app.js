@@ -241,7 +241,6 @@ class GameEngine {
         } else {
             if (feedbackEl) feedbackEl.innerText = "";
             
-            // 讀取各選項專屬帶入的句型 template
             const template = item.template || "I want {item}.";
             const itemWithArticle = item.article ? `${item.article} ${item.name}` : item.name;
             
@@ -335,7 +334,15 @@ class GameEngine {
                 feedbackEl.className = "feedback success";
             }
             
-            const happyUtterance = new SpeechSynthesisUtterance("Yummy! Thank you!");
+            // 修正：依照目前關卡給予正確的語音反饋（餐廳維持 yummy，新篇章給予對應的稱讚）
+            let praiseText = "Awesome! Great job!";
+            if (this.currentLevelId === "restaurant") {
+                praiseText = "Yummy! Thank you!";
+            } else {
+                praiseText = "Wonderful! Excellent job!";
+            }
+
+            const happyUtterance = new SpeechSynthesisUtterance(praiseText);
             happyUtterance.lang = 'en-US';
             window.speechSynthesis.speak(happyUtterance);
 
