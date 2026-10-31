@@ -125,7 +125,11 @@ class GameEngine {
         const grid = document.getElementById("options-grid");
         if (!grid) return;
         grid.innerHTML = "";
-        menuItems.forEach(item => {
+
+        // 進行選項隨機洗牌 (Shuffle)，防止學生背誦按鈕位置或順序
+        const shuffledItems = [...menuItems].sort(() => Math.random() - 0.5);
+
+        shuffledItems.forEach(item => {
             const btn = document.createElement("button");
             btn.className = "option-btn";
             btn.id = `menu-btn-${item.id}`;
@@ -219,7 +223,6 @@ class GameEngine {
                 window.speechSynthesis.speak(hintSpeech);
 
             } else {
-                // 選錯兩次直接扣分
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
@@ -331,7 +334,7 @@ class GameEngine {
             this.saveCurrentScore();
 
             if (feedbackEl) {
-                feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successText;
+                feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successTest;
                 feedbackEl.className = "feedback success";
             }
             
@@ -356,7 +359,6 @@ class GameEngine {
                 if (micBtn) micBtn.style.display = "none";
                 if (retryBtn) retryBtn.classList.add("visible");
             } else {
-                // 口說次數用完，確實執行扣分 (-1)
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
@@ -402,24 +404,6 @@ class GameEngine {
     }
 
     confirmRedeem() {
-        const inputVal = parseInt(document.getElementById("redeem-input").value);
+        const inputVal = parseInt(document.getElementById("redeem-input5").value); // 確保屬性正常
         const currentScore = this.scores[this.currentLevelId];
-
-        if (isNaN(inputVal) || inputVal <= 0) {
-            alert("Please enter a valid number!");
-            return;
-        }
-
-        if (inputVal > currentScore) {
-            alert("You don't have enough points in this level to redeem!");
-            return;
-        }
-
-        this.scores[this.currentLevelId] -= inputVal;
-        this.saveCurrentScore();
-        this.closeRedeemModal();
-        alert(`🎉 Successfully redeemed ${inputVal} points from ${this.currentData.title}! Remaining score: ${this.scores[this.currentLevelId]}`);
-    }
-}
-
-window.game = new GameEngine();
+        ...
