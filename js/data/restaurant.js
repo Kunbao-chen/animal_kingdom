@@ -29,7 +29,7 @@ export const restaurantData = {
     customers: [
         {
             avatar: "🧔",
-            text: "It's so hot today! I need a cold drink to cool down.",
+            text: "It's scorching hot outside after my long walk. I definitely need something icy to chill out.",
             requiredTags: ["drink", "cold"],
             hintText: "Pick something cold to drink!",
             successText: "Ah, so refreshing! Thank you! (+1)",
@@ -37,19 +37,27 @@ export const restaurantData = {
         },
         {
             avatar: "👩",
-            text: "I am super hungry! I want a big hot meal for dinner.",
-            requiredTags: ["food", "meal"],
-            hintText: "Pick a hearty food item!",
-            successText: "Yum! This meal looks delicious! (+1)",
-            failText: "That's not a proper meal! (-1)"
+            text: "I just finished my heavy lunch, but I'm still craving something sweet and sugary.",
+            requiredTags: ["dessert"],
+            hintText: "Pick a sweet dessert or treat!",
+            successText: "Mmm, so sweet and satisfying! (+1)",
+            failText: "That's not a sweet dessert! (-1)"
         },
         {
             avatar: "🧑",
-            text: "I want a sweet dessert after lunch!",
-            requiredTags: ["dessert"],
-            hintText: "Pick a sweet dessert or treat!",
-            successText: "Mmm, so sweet! Loved it! (+1)",
-            failText: "That's not a sweet dessert! (-1)"
+            text: "The weather is freezing today. I'd love to warm up with a steaming beverage.",
+            requiredTags: ["drink", "hot"],
+            hintText: "Pick a hot drink to warm up!",
+            successText: "Delicious and warm! Perfect! (+1)",
+            failText: "That's not a hot drink! (-1)"
+        },
+        {
+            avatar: "👧",
+            text: "I skipped breakfast and I am extremely hungry. I need a solid, warm meal right now.",
+            requiredTags: ["food", "meal"],
+            hintText: "Pick a hearty meal like pizza, burger, or noodles!",
+            successText: "Yum! This meal looks amazing! (+1)",
+            failText: "That's not a proper meal! (-1)"
         }
     ]
 };
