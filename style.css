@@ -1,19 +1,380 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+#game-container {
+    width: 100%;
+    max-width: 650px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    padding: 24px;
+    overflow: hidden;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 15px;
+}
+
 .level-selector-box {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.15);
-    padding: 4px 10px;
+    background: #f8fafc;
+    padding: 6px 12px;
     border-radius: 12px;
+    border: 1px solid #e2e8f0;
 }
 
 .level-select {
     background: white;
     color: #1e293b;
-    border: none;
+    border: 1px solid #cbd5e1;
     padding: 6px 10px;
     border-radius: 8px;
     font-size: 0.9rem;
     font-weight: bold;
     cursor: pointer;
     outline: none;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.redeem-btn {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.redeem-btn:hover {
+    background: #d97706;
+}
+
+.score-box {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.05rem;
+}
+
+.npc-section {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+}
+
+.npc-avatar {
+    font-size: 3rem;
+    margin-right: 15px;
+}
+
+.speech-bubble {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    flex-grow: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.05rem;
+    color: #334155;
+    font-weight: 500;
+}
+
+.audio-btn {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.2s;
+    flex-shrink: 0;
+    margin-left: 10px;
+}
+
+.audio-btn:hover {
+    background: #e2e8f0;
+}
+
+.section-title {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #64748b;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.option-btn {
+    background: white;
+    border: 2px solid #cbd5e1;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: bold;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.option-btn:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.option-btn.selected {
+    background: #3b82f6;
+    color: white;
+    border-color: #2563eb;
+}
+
+.option-btn.wrong-disabled {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.speaking-area {
+    display: none;
+    background: #f0fdf4;
+    border: 2px dashed #bbf7d0;
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.target-sentence {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #166534;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.mic-btn {
+    background: #22c55e;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 1.05rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    transition: background 0.2s;
+}
+
+.mic-btn:hover {
+    background: #16a34a;
+}
+
+.mic-btn.listening {
+    background: #ef4444;
+    animation: pulse 1.5s infinite;
+}
+
+.retry-btn {
+    display: none;
+    background: #f59e0b;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.retry-btn.visible {
+    display: inline-flex;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.recognized-text {
+    font-style: italic;
+    color: #475569;
+    margin-top: 8px;
+    font-size: 0.95rem;
+}
+
+.attempts-left {
+    font-size: 0.85rem;
+    color: #d97706;
+    margin-top: 4px;
+    font-weight: bold;
+}
+
+.feedback {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.feedback.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.feedback.error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.feedback.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.next-btn-container {
+    text-align: right;
+}
+
+.next-btn {
+    display: none;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.next-btn.visible {
+    display: inline-block;
+}
+
+/* 兌換彈窗樣式 */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
+    color: #1e293b;
+}
+
+.modal-content p {
+    margin-bottom: 10px;
+    color: #475569;
+}
+
+.redeem-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin: 15px 0;
+    text-align: center;
+    outline: none;
+}
+
+.modal-btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.claim-btn {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-btn {
+    background: #64748b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
 }
