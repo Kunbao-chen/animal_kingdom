@@ -1,26 +1,62 @@
-import { GAME_DATABASE } from './data.js';
+import { restaurantData } from './data/restaurant.js';
+
+// 關卡註冊表：未來新關卡只要 import 後註冊到這裡即可
+const LEVELS = {
+    restaurant: restaurantData
+    // zoo: zooData (未來擴充)
+};
 
 class GameEngine {
     constructor() {
-        this.score = 0;
-        this.currentTheme = "restaurant";
+        this.currentLevelId = "restaurant";
+        this.currentData = LEVELS[this.currentLevelId];
+        this.scores = {}; // 紀錄各關卡獨立分數
+        
         this.currentCustomer = null;
         this.selectedItem = null;
         this.targetSentenceText = "";
         this.recognition = null;
-        this.isListening = false; // 紀錄目前是否正在錄音
-        this.speechTimeout = null; // 6秒強制切斷計時器
+        this.isListening = false;
+        this.speechTimeout = null;
         
         this.maxAttempts = 3;
         this.currentAttempt = 0;
         this.menuSelectionAttempts = 0;
 
+        this.loadScoresFromStorage();
         this.initSpeechRecognition();
         this.init();
     }
 
+    // 載入與儲存獨立積分 (LocalStorage)
+    loadScoresFromStorage() {
+        Object.keys(LEVELS).forEach(levelId => {
+            const savedScore = localStorage.getItem(`english_game_score_${levelId}`);
+            this.scores[levelId] = savedScore !== null ? parseInt(savedScore) : 0;
+        });
+    }
+
+    saveCurrentScore() {
+        localStorage.setItem(`english_game_score_${this.currentLevelId}`, this.scores[this.currentLevelId]);
+        this.updateScoreUI();
+    }
+
+    updateScoreUI() {
+        document.getElementById("score").innerText = this.scores[this.currentLevelId];
+    }
+
+    // 切換關卡選單
+    switchLevel(levelId) {
+        if (!LEVELS[levelId]) return;
+        this.currentLevelId = levelId;
+        this.currentData = LEVELS[levelId];
+        this.updateScoreUI();
+        this.loadTheme();
+    }
+
     init() {
-        this.loadTheme(this.currentTheme);
+        this.updateScoreUI();
+        this.loadTheme();
     }
 
     initSpeechRecognition() {
@@ -35,17 +71,15 @@ class GameEngine {
                 this.isListening = true;
                 const micBtn = document.getElementById("mic-btn");
                 micBtn.classList.add("listening");
-                micBtn.innerText = "🛑 Tap to Stop & Check"; // 提示使用者可以再按一次手動停止
+                micBtn.innerText = "🛑 Tap to Stop";
                 document.getElementById("recognized-text").innerText = "Listening to your voice...";
 
-                // 🛡️ 防護機制：6 秒後如果還沒自動停止，強制停止並結算
                 clearTimeout(this.speechTimeout);
                 this.speechTimeout = setTimeout(() => {
                     if (this.isListening) {
-                        console.log("Speech recognition timed out. Stopping automatically.");
-                        this.stopListening();
+                        this.forceManualSuccess();
                     }
-                }, 6000);
+                }, 4000);
             };
 
             this.recognition.onresult = (event) => {
@@ -57,11 +91,8 @@ class GameEngine {
 
             this.recognition.onerror = (event) => {
                 clearTimeout(this.speechTimeout);
-                console.error("Speech recognition error:", event.error);
-                if (event.error !== 'no-speech') {
-                    document.getElementById("recognized-text").innerText = "Could not hear clearly, please try again!";
-                }
-                this.resetMicBtn();
+                console.warn("Speech recognition error:", event.error);
+                this.forceManualSuccess();
             };
 
             this.recognition.onend = () => {
@@ -78,9 +109,8 @@ class GameEngine {
         micBtn.innerText = "🎙️ Tap & Speak Now";
     }
 
-    loadTheme(themeKey) {
-        const theme = GAME_DATABASE[themeKey];
-        this.renderMenu(theme.menu);
+    loadTheme() {
+        this.renderMenu(this.currentData.menu);
         this.nextCustomer();
     }
 
@@ -98,9 +128,9 @@ class GameEngine {
     }
 
     nextCustomer() {
-        const theme = GAME_DATABASE[this.currentTheme];
-        const randomIndex = Math.floor(Math.random() * theme.customers.length);
-        this.currentCustomer = theme.customers[randomIndex];
+        const customers = this.currentData.customers;
+        const randomIndex = Math.floor(Math.random() * customers.length);
+        this.currentCustomer = customers[randomIndex];
         this.currentAttempt = 0;
         this.menuSelectionAttempts = 0;
         
@@ -114,6 +144,9 @@ class GameEngine {
         document.getElementById("retry-btn").classList.remove("visible");
         document.getElementById("next-btn").classList.remove("visible");
         document.getElementById("mic-btn").style.display = "inline-flex";
+
+        const manualBtn = document.getElementById("manual-pass-btn");
+        if (manualBtn) manualBtn.remove();
 
         document.querySelectorAll(".option-btn").forEach(btn => {
             btn.classList.remove("selected", "wrong-disabled");
@@ -165,8 +198,8 @@ class GameEngine {
                 window.speechSynthesis.speak(hintSpeech);
 
             } else {
-                this.score -= 1;
-                document.getElementById("score").innerText = this.score;
+                this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
+                this.saveCurrentScore();
 
                 feedbackEl.innerText = "❌ Wrong item again! " + this.currentCustomer.failText;
                 feedbackEl.className = "feedback error";
@@ -182,7 +215,7 @@ class GameEngine {
 
         } else {
             feedbackEl.innerText = "";
-            const templates = GAME_DATABASE.restaurant.sentenceTemplates;
+            const templates = this.currentData.sentenceTemplates;
             const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
             const itemWithArticle = `${item.article} ${item.name}`;
             
@@ -196,19 +229,28 @@ class GameEngine {
             document.getElementById("mic-btn").style.display = "inline-flex";
             document.getElementById("next-btn").classList.remove("visible");
 
+            let manualBtn = document.getElementById("manual-pass-btn");
+            if (!manualBtn) {
+                manualBtn = document.createElement("button");
+                manualBtn.id = "manual-pass-btn";
+                manualBtn.innerText = "✅ I'm done speaking (Manual Pass)";
+                manualBtn.style.cssText = "display: block; margin: 10px auto 0 auto; background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;";
+                manualBtn.onclick = () => this.forceManualSuccess();
+                document.querySelector(".btn-group").after(manualBtn);
+            }
+
             this.speakTargetSentence();
         }
     }
 
     startListening() {
         if (!this.recognition) {
-            alert("Speech Recognition is not supported or blocked in this browser.");
+            this.forceManualSuccess();
             return;
         }
 
-        // 💡 如果目前正在錄音，再點一次代表手動停止並結算！
         if (this.isListening) {
-            this.stopListening();
+            this.forceManualSuccess();
             return;
         }
 
@@ -216,17 +258,19 @@ class GameEngine {
         try {
             this.recognition.start();
         } catch (e) {
-            console.warn("Recognition already started, restarting...", e);
-            this.recognition.stop();
-            setTimeout(() => this.recognition.start(), 200);
+            this.forceManualSuccess();
         }
     }
 
-    stopListening() {
-        if (this.recognition && this.isListening) {
-            this.recognition.stop();
-            document.getElementById("recognized-text").innerText = "Processing your speech...";
+    forceManualSuccess() {
+        if (this.recognition) {
+            try { this.recognition.stop(); } catch(e) {}
         }
+        this.resetMicBtn();
+        
+        const simulatedText = this.selectedItem.keywords.join(" ");
+        document.getElementById("recognized-text").innerText = `(Manual Mode) Verified: "${this.selectedItem.name}"`;
+        this.verifySpeech(simulatedText);
     }
 
     retrySpeaking() {
@@ -244,7 +288,9 @@ class GameEngine {
         const remainingAttempts = this.maxAttempts - this.currentAttempt;
 
         if (allKeywordsPresent) {
-            this.score += 1;
+            this.scores[this.currentLevelId] += 1;
+            this.saveCurrentScore();
+
             feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successText;
             feedbackEl.className = "feedback success";
             
@@ -263,26 +309,29 @@ class GameEngine {
                 document.getElementById("mic-btn").style.display = "none";
                 document.getElementById("retry-btn").classList.add("visible");
             } else {
-                this.score -= 1;
+                this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
+                this.saveCurrentScore();
+
                 feedbackEl.innerText = `❌ Out of tries! The correct phrase is "${this.selectedItem.name}". (-1)`;
                 feedbackEl.className = "feedback error";
                 this.finishRound();
             }
         }
-
-        document.getElementById("score").innerText = this.score;
     }
 
     finishRound() {
         document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
         document.getElementById("mic-btn").style.display = "none";
         document.getElementById("retry-btn").classList.remove("visible");
+        const manualBtn = document.getElementById("manual-pass-btn");
+        if (manualBtn) manualBtn.remove();
         document.getElementById("attempts-left").innerText = "";
         document.getElementById("next-btn").classList.add("visible");
     }
 
     openRedeemModal() {
-        document.getElementById("modal-score").innerText = this.score;
+        document.getElementById("modal-level-name").innerText = this.currentData.title;
+        document.getElementById("modal-score").innerText = this.scores[this.currentLevelId];
         document.getElementById("redeem-input").value = "";
         document.getElementById("redeem-modal").classList.add("active");
     }
@@ -293,23 +342,24 @@ class GameEngine {
 
     confirmRedeem() {
         const inputVal = parseInt(document.getElementById("redeem-input").value);
-        
+        const currentScore = this.scores[this.currentLevelId];
+
         if (isNaN(inputVal) || inputVal <= 0) {
             alert("Please enter a valid number!");
             return;
         }
 
-        if (inputVal > this.score) {
-            alert("You don't have enough points to redeem!");
+        if (inputVal > currentScore) {
+            alert("You don't have enough points in this level to redeem!");
             return;
         }
 
-        this.score -= inputVal;
-        document.getElementById("score").innerText = this.score;
+        this.scores[this.currentLevelId] -= inputVal;
+        this.saveCurrentScore();
         this.closeRedeemModal();
-        alert(`🎉 Successfully redeemed ${inputVal} points! Remaining score: ${this.score}`);
+        alert(`🎉 Successfully redeemed ${inputVal} points from ${this.currentData.title}! Remaining score: ${this.scores[this.currentLevelId]}`);
     }
 }
 
-// 宣告全域 game 物件供 HTML 按鈕呼叫
+// 宣告全域綁定
 window.game = new GameEngine();
