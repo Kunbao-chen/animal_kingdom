@@ -7,13 +7,13 @@ export const topic1ComprehensiveData = {
         { id: "sunday", name: "Sunday", article: "", keywords: ["sunday"], tags: ["day", "zoo"], template: "It is {item}." },
         { id: "monday", name: "Monday", article: "", keywords: ["monday"], tags: ["day", "school"], template: "It is {item}." },
         
-        // 🧸 B. 玩具類 (對答：Here are your...)
-        { id: "yo_yos", name: "Yo-yos", article: "", keywords: ["yo", "yos"], tags: ["toy", "fun"], template: "Here are your {item}." },
-        { id: "robots", name: "Robots", article: "", keywords: ["robots"], tags: ["toy", "fun"], template: "Here are your {item}." },
+        // 🧸 B. 玩具類 (對答修正：Here is my... 或 Look at my...)
+        { id: "yo_yos", name: "Yo-yos", article: "", keywords: ["yo", "yos"], tags: ["toy", "fun"], template: "Here is my {item}." },
+        { id: "robots", name: "Robots", article: "", keywords: ["robots"], tags: ["toy", "fun"], template: "Here is my {item}." },
         
-        // 🍕 C. 食物飲料類 (對答：Here is...)
-        { id: "pizza", name: "Pizza", article: "some", keywords: ["pizza"], tags: ["food", "lunch"], template: "Here is {item}." },
-        { id: "juice", name: "Juice", article: "some", keywords: ["juice"], tags: ["food", "drink"], template: "Here is {item}." },
+        // 🍕 C. 食物飲料類 (對答：I want...)
+        { id: "pizza", name: "Pizza", article: "some", keywords: ["pizza"], tags: ["food", "lunch"], template: "I want {item}." },
+        { id: "juice", name: "Juice", article: "some", keywords: ["juice"], tags: ["food", "drink"], template: "I want {item}." },
         
         // 🔤 D. 發音類 (對答：Look at the...)
         { id: "chair", name: "Chair", article: "a", keywords: ["chair"], tags: ["phonics", "ch"], template: "Look at the {item}." },
@@ -41,9 +41,9 @@ export const topic1ComprehensiveData = {
         },
         {
             avatar: "🐵",
-            text: "I want to play games in the park right now. Can you hand over my favorite toys?",
+            text: "I want to play games in the park right now. Can you show me your toys?",
             requiredTags: ["toy"],
-            hintText: "Hand over a toy like yo-yos or robots!",
+            hintText: "Show your toy like yo-yos or robots!",
             successText: "Woohoo! Those toys are so cool! (+1)",
             failText: "That's not a toy! (-1)"
         },
