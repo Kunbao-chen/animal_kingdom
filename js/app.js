@@ -126,7 +126,7 @@ class GameEngine {
         if (!grid) return;
         grid.innerHTML = "";
 
-        // 進行選項隨機洗牌 (Shuffle)，防止學生背誦按鈕位置或順序
+        // 選項隨機洗牌 (Shuffle)，防止學生背誦按鈕位置
         const shuffledItems = [...menuItems].sort(() => Math.random() - 0.5);
 
         shuffledItems.forEach(item => {
@@ -334,7 +334,7 @@ class GameEngine {
             this.saveCurrentScore();
 
             if (feedbackEl) {
-                feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successTest;
+                feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successText;
                 feedbackEl.className = "feedback success";
             }
             
@@ -404,6 +404,24 @@ class GameEngine {
     }
 
     confirmRedeem() {
-        const inputVal = parseInt(document.getElementById("redeem-input5").value); // 確保屬性正常
+        const inputVal = parseInt(document.getElementById("redeem-input").value);
         const currentScore = this.scores[this.currentLevelId];
-        ...
+
+        if (isNaN(inputVal) || inputVal <= 0) {
+            alert("Please enter a valid number!");
+            return;
+        }
+
+        if (inputVal > currentScore) {
+            alert("You don't have enough points in this level to redeem!");
+            return;
+        }
+
+        this.scores[this.currentLevelId] -= inputVal;
+        this.saveCurrentScore();
+        this.closeRedeemModal();
+        alert(`🎉 Successfully redeemed ${inputVal} points from ${this.currentData.title}! Remaining score: ${this.scores[this.currentLevelId]}`);
+    }
+}
+
+window.game = new GameEngine();
