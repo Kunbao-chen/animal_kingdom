@@ -241,11 +241,12 @@ class GameEngine {
 
         } else {
             if (feedbackEl) feedbackEl.innerText = "";
-            const templates = this.currentData.sentenceTemplates;
-            const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+            
+            // 修正：直接讀取該選項專屬的正確句型模板
+            const template = item.template || "I want {item}.";
             const itemWithArticle = item.article ? `${item.article} ${item.name}` : item.name;
             
-            this.targetSentenceText = randomTemplate.replace("{item}", itemWithArticle);
+            this.targetSentenceText = template.replace("{item}", itemWithArticle);
             
             const targetSentenceEl = document.getElementById("target-sentence");
             const stepSpeaking = document.getElementById("step-speaking");
