@@ -10,8 +10,8 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 20px;
+    align-items: flex-start; /* 修正：讓主要區塊往上靠，不完全垂直置中 */
+    padding: 30px 20px;
 }
 
 #game-container {
