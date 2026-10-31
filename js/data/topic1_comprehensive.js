@@ -1,32 +1,18 @@
 export const topic1ComprehensiveData = {
     id: "topic1_comprehensive",
-    title: "🦁 Super Fun 5 - Topic 1 (Zoo & Prep Full Edition)",
-    
-    sentenceTemplates: [
-        "Today is {item}.",
-        "I like to {item}.",
-        "Look at the {item}!"
-    ],
+    title: "Super Fun 5 - Topic 1 (Zoo & Prep Full Edition)",
 
     menu: [
-        // 🐾 A. Topic 1 核心：星期與日常作息
-        { id: "sunday",    name: "Sunday",    article: "", keywords: ["sunday"],    tags: ["day", "zoo"] },
-        { id: "monday",    name: "Monday",    article: "", keywords: ["monday"],    tags: ["day", "school"] },
-        { id: "get_up",    name: "Get up",    article: "", keywords: ["get", "up"],    tags: ["routine", "morning"] },
-        { id: "go_to_school", name: "Go to school", article: "", keywords: ["go", "school"], tags: ["routine"] },
-
-        // 🧸 B. Topic Review 經典複習單字
-        { id: "yo_yos",    name: "Yo-yos",    article: "", keywords: ["yo", "yos"],    tags: ["toy", "fun"] },
-        { id: "robots",    name: "Robots",    article: "", keywords: ["robots"],    tags: ["toy", "fun"] },
-        { id: "pizza",     name: "Pizza",     article: "", keywords: ["pizza"],     tags: ["food", "lunch"] },
-        { id: "juice",     name: "Juice",     article: "", keywords: ["juice"],     tags: ["food", "drink"] },
-
-        // 🔤 C. Phonics Fun 自然發音重點單字
-        { id: "chair",     name: "Chair",     article: "a", keywords: ["chair"],    tags: ["phonics", "ch"] },
-        { id: "watch",     name: "Watch",     article: "a", keywords: ["watch"],    tags: ["phonics", "ch"] },
-        { id: "fish",      name: "Fish",      article: "a", keywords: ["fish"],     tags: ["phonics", "sh", "zoo"] },
-        { id: "whale",     name: "Whale",     article: "a", keywords: ["whale"],    tags: ["phonics", "wh", "zoo"] },
-        { id: "phone",     name: "Phone",     article: "a", keywords: ["phone"],    tags: ["phonics", "ph"] }
+        { id: "sunday", name: "Sunday", article: "", keywords: ["sunday"], tags: ["day", "zoo"], template: "Today is {item}." },
+        { id: "monday", name: "Monday", article: "", keywords: ["monday"], tags: ["day", "school"], template: "Today is {item}." },
+        { id: "yo_yos", name: "Yo-yos", article: "", keywords: ["yo", "yos"], tags: ["toy", "fun"], template: "I like {item}." },
+        { id: "robots", name: "Robots", article: "", keywords: ["robots"], tags: ["toy", "fun"], template: "I like {item}." },
+        { id: "pizza", name: "Pizza", article: "some", keywords: ["pizza"], tags: ["food", "lunch"], template: "I want {item}." },
+        { id: "juice", name: "Juice", article: "some", keywords: ["juice"], tags: ["food", "drink"], template: "I want {item}." },
+        { id: "chair", name: "Chair", article: "a", keywords: ["chair"], tags: ["phonics", "ch"], template: "Look at the {item}." },
+        { id: "fish", name: "Fish", article: "a", keywords: ["fish"], tags: ["phonics", "sh", "zoo"], template: "Look at the {item}." },
+        { id: "whale", name: "Whale", article: "a", keywords: ["whale"], tags: ["phonics", "wh", "zoo"], template: "Look at the {item}." },
+        { id: "phone", name: "Phone", article: "a", keywords: ["phone"], tags: ["phonics", "ph"], template: "Look at the {item}." }
     ],
 
     customers: [
