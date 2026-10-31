@@ -1,7 +1,7 @@
 import { restaurantData } from './data/restaurant.js';
 import { topic1ComprehensiveData } from './data/topic1_comprehensive.js';
 
-// 關卡註冊表：未來只要在這裡註冊新的資料檔即可自動擴充
+// 關卡註冊表
 const LEVELS = {
     restaurant: restaurantData,
     topic1_comprehensive: topic1ComprehensiveData
@@ -11,7 +11,7 @@ class GameEngine {
     constructor() {
         this.currentLevelId = "restaurant";
         this.currentData = LEVELS[this.currentLevelId];
-        this.scores = {}; // 紀錄各關卡獨立分數
+        this.scores = {};
         
         this.currentCustomer = null;
         this.selectedItem = null;
@@ -24,13 +24,11 @@ class GameEngine {
         this.currentAttempt = 0;
         this.menuSelectionAttempts = 0;
 
-        // 1. 初始化所有關卡的獨立計分
         this.loadScoresFromStorage();
         this.initSpeechRecognition();
         this.init();
     }
 
-    // 從 LocalStorage 載入各關卡獨立分數
     loadScoresFromStorage() {
         Object.keys(LEVELS).forEach(levelId => {
             const savedScore = localStorage.getItem(`english_game_score_${levelId}`);
@@ -38,13 +36,11 @@ class GameEngine {
         });
     }
 
-    // 儲存當前關卡分數並更新介面
     saveCurrentScore() {
         localStorage.setItem(`english_game_score_${this.currentLevelId}`, this.scores[this.currentLevelId]);
         this.updateScoreUI();
     }
 
-    // 更新畫面上的分數顯示
     updateScoreUI() {
         const scoreElement = document.getElementById("score");
         if (scoreElement) {
@@ -52,13 +48,10 @@ class GameEngine {
         }
     }
 
-    // 切換關卡選單（確保分數、標題與主題同步切換）
     switchLevel(levelId) {
         if (!LEVELS[levelId]) return;
         this.currentLevelId = levelId;
         this.currentData = LEVELS[levelId];
-        
-        // 切換時立即更新該關卡的獨立分數與畫面
         this.updateScoreUI();
         this.loadTheme();
     }
@@ -227,7 +220,6 @@ class GameEngine {
                 window.speechSynthesis.speak(hintSpeech);
 
             } else {
-                // 錯誤達兩次，扣除當前關卡分數
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
@@ -335,7 +327,6 @@ class GameEngine {
         const remainingAttempts = this.maxAttempts - this.currentAttempt;
 
         if (allKeywordsPresent) {
-            // 答對加分（針對當前關卡獨立加分）
             this.scores[this.currentLevelId] += 1;
             this.saveCurrentScore();
 
@@ -364,7 +355,6 @@ class GameEngine {
                 if (micBtn) micBtn.style.display = "none";
                 if (retryBtn) retryBtn.classList.add("visible");
             } else {
-                // 嘗試次數用完，扣除當前關卡分數
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
@@ -423,7 +413,6 @@ class GameEngine {
             return;
         }
 
-        // 扣除當前關卡的分數
         this.scores[this.currentLevelId] -= inputVal;
         this.saveCurrentScore();
         this.closeRedeemModal();
@@ -431,5 +420,4 @@ class GameEngine {
     }
 }
 
-// 宣告全域綁定
 window.game = new GameEngine();
