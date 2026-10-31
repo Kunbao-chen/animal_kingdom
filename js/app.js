@@ -241,6 +241,7 @@ class GameEngine {
         } else {
             if (feedbackEl) feedbackEl.innerText = "";
             
+            // 關鍵對應：直接讀取選項專屬的 template
             const template = item.template || "I want {item}.";
             const itemWithArticle = item.article ? `${item.article} ${item.name}` : item.name;
             
