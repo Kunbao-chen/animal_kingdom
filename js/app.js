@@ -1,7 +1,6 @@
 import { restaurantData } from './data/restaurant.js';
 import { topic1ComprehensiveData } from './data/topic1_comprehensive.js';
 
-// 關卡註冊表
 const LEVELS = {
     restaurant: restaurantData,
     topic1_comprehensive: topic1ComprehensiveData
@@ -242,7 +241,6 @@ class GameEngine {
         } else {
             if (feedbackEl) feedbackEl.innerText = "";
             
-            // 修正：直接讀取該選項專屬的正確句型模板
             const template = item.template || "I want {item}.";
             const itemWithArticle = item.article ? `${item.article} ${item.name}` : item.name;
             
