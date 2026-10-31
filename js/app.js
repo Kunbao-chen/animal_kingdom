@@ -1,10 +1,10 @@
 import { restaurantData } from './data/restaurant.js';
-import { topic1Lesson1Data } from './data/topic1_lesson1.js';
+import { topic1ComprehensiveData } from './data/topic1_comprehensive.js';
 
 const LEVELS = {
     restaurant: restaurantData,
-    topic1_lesson1: topic1Lesson1Data
-};
+    topic1_comprehensive: topic1ComprehensiveData
+};;
 
 class GameEngine {
     constructor() {
