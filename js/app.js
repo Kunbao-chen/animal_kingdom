@@ -2,30 +2,36 @@ import { restaurantData } from './data/restaurant.js';
 import { topic1ComprehensiveData } from './data/topic1_comprehensive.js';
 
 const LEVELS = {
-    restaurant: restaurantData,
-    topic1_comprehensive: topic1ComprehensiveData
+    restaurant: restaurantData || { title: "Restaurant (載入失敗)", menu: [], customers: [] },
+    topic1_comprehensive: topic1ComprehensiveData || { title: "Topic 1 (載入失敗)", menu: [], customers: [] }
 };
 
 class GameEngine {
     constructor() {
-        this.currentLevelId = "restaurant";
-        this.currentData = LEVELS[this.currentLevelId];
-        this.scores = {};
-        
-        this.currentCustomer = null;
-        this.selectedItem = null;
-        this.targetSentenceText = "";
-        this.recognition = null;
-        this.isListening = false;
-        this.speechTimeout = null;
-        
-        this.maxAttempts = 3;
-        this.currentAttempt = 0;
-        this.menuSelectionAttempts = 0;
+        try {
+            this.currentLevelId = "restaurant";
+            this.currentData = LEVELS[this.currentLevelId];
+            this.scores = {};
+            
+            this.currentCustomer = null;
+            this.selectedItem = null;
+            this.targetSentenceText = "";
+            this.recognition = null;
+            this.isListening = false;
+            this.speechTimeout = null;
+            
+            this.maxAttempts = 3;
+            this.currentAttempt = 0;
+            this.menuSelectionAttempts = 0;
 
-        this.loadScoresFromStorage();
-        this.initSpeechRecognition();
-        this.init();
+            this.loadScoresFromStorage();
+            this.initSpeechRecognition();
+            this.init();
+        } catch (error) {
+            console.error("Game Initialization Error:", error);
+            const speechText = document.getElementById("speech-text");
+            if (speechText) speechText.innerText = `Error: ${error.message}`;
+        }
     }
 
     loadScoresFromStorage() {
@@ -117,6 +123,10 @@ class GameEngine {
     }
 
     loadTheme() {
+        if (!this.currentData || !this.currentData.menu || !this.currentData.customers) {
+            console.error("Invalid level data:", this.currentData);
+            return;
+        }
         this.renderMenu(this.currentData.menu);
         this.nextCustomer();
     }
@@ -126,7 +136,7 @@ class GameEngine {
         if (!grid) return;
         grid.innerHTML = "";
 
-        // 選項隨機洗牌 (Shuffle)，防止學生背誦按鈕位置
+        // 選項隨機洗牌 (Shuffle)
         const shuffledItems = [...menuItems].sort(() => Math.random() - 0.5);
 
         shuffledItems.forEach(item => {
@@ -141,6 +151,8 @@ class GameEngine {
 
     nextCustomer() {
         const customers = this.currentData.customers;
+        if (!customers || customers.length === 0) return;
+        
         const randomIndex = Math.floor(Math.random() * customers.length);
         this.currentCustomer = customers[randomIndex];
         this.currentAttempt = 0;
@@ -180,6 +192,7 @@ class GameEngine {
     }
 
     speakCustomerText() {
+        if (!this.currentCustomer) return;
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(this.currentCustomer.text);
         utterance.lang = 'en-US';
