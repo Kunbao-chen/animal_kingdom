@@ -1,9 +1,9 @@
 import { restaurantData } from './data/restaurant.js';
+import { topic1Lesson1Data } from './data/topic1_lesson1.js';
 
-// 關卡註冊表：未來新關卡只要 import 後註冊到這裡即可
 const LEVELS = {
-    restaurant: restaurantData
-    // zoo: zooData (未來擴充)
+    restaurant: restaurantData,
+    topic1_lesson1: topic1Lesson1Data
 };
 
 class GameEngine {
