@@ -1,10 +1,11 @@
 import { restaurantData } from './data/restaurant.js';
 import { topic1ComprehensiveData } from './data/topic1_comprehensive.js';
 
+// 關卡註冊表：未來只要在這裡註冊新的資料檔即可自動擴充
 const LEVELS = {
     restaurant: restaurantData,
     topic1_comprehensive: topic1ComprehensiveData
-};;
+};
 
 class GameEngine {
     constructor() {
@@ -23,12 +24,13 @@ class GameEngine {
         this.currentAttempt = 0;
         this.menuSelectionAttempts = 0;
 
+        // 1. 初始化所有關卡的獨立計分
         this.loadScoresFromStorage();
         this.initSpeechRecognition();
         this.init();
     }
 
-    // 載入與儲存獨立積分 (LocalStorage)
+    // 從 LocalStorage 載入各關卡獨立分數
     loadScoresFromStorage() {
         Object.keys(LEVELS).forEach(levelId => {
             const savedScore = localStorage.getItem(`english_game_score_${levelId}`);
@@ -36,20 +38,27 @@ class GameEngine {
         });
     }
 
+    // 儲存當前關卡分數並更新介面
     saveCurrentScore() {
         localStorage.setItem(`english_game_score_${this.currentLevelId}`, this.scores[this.currentLevelId]);
         this.updateScoreUI();
     }
 
+    // 更新畫面上的分數顯示
     updateScoreUI() {
-        document.getElementById("score").innerText = this.scores[this.currentLevelId];
+        const scoreElement = document.getElementById("score");
+        if (scoreElement) {
+            scoreElement.innerText = this.scores[this.currentLevelId];
+        }
     }
 
-    // 切換關卡選單
+    // 切換關卡選單（確保分數、標題與主題同步切換）
     switchLevel(levelId) {
         if (!LEVELS[levelId]) return;
         this.currentLevelId = levelId;
         this.currentData = LEVELS[levelId];
+        
+        // 切換時立即更新該關卡的獨立分數與畫面
         this.updateScoreUI();
         this.loadTheme();
     }
@@ -70,9 +79,12 @@ class GameEngine {
             this.recognition.onstart = () => {
                 this.isListening = true;
                 const micBtn = document.getElementById("mic-btn");
-                micBtn.classList.add("listening");
-                micBtn.innerText = "🛑 Tap to Stop";
-                document.getElementById("recognized-text").innerText = "Listening to your voice...";
+                if (micBtn) {
+                    micBtn.classList.add("listening");
+                    micBtn.innerText = "🛑 Tap to Stop";
+                }
+                const recognizedEl = document.getElementById("recognized-text");
+                if (recognizedEl) recognizedEl.innerText = "Listening to your voice...";
 
                 clearTimeout(this.speechTimeout);
                 this.speechTimeout = setTimeout(() => {
@@ -85,7 +97,8 @@ class GameEngine {
             this.recognition.onresult = (event) => {
                 clearTimeout(this.speechTimeout);
                 const speechResult = event.results[0][0].transcript.toLowerCase();
-                document.getElementById("recognized-text").innerText = `You said: "${speechResult}"`;
+                const recognizedEl = document.getElementById("recognized-text");
+                if (recognizedEl) recognizedEl.innerText = `You said: "${speechResult}"`;
                 this.verifySpeech(speechResult);
             };
 
@@ -105,8 +118,10 @@ class GameEngine {
     resetMicBtn() {
         this.isListening = false;
         const micBtn = document.getElementById("mic-btn");
-        micBtn.classList.remove("listening");
-        micBtn.innerText = "🎙️ Tap & Speak Now";
+        if (micBtn) {
+            micBtn.classList.remove("listening");
+            micBtn.innerText = "🎙️ Tap & Speak Now";
+        }
     }
 
     loadTheme() {
@@ -116,6 +131,7 @@ class GameEngine {
 
     renderMenu(menuItems) {
         const grid = document.getElementById("options-grid");
+        if (!grid) return;
         grid.innerHTML = "";
         menuItems.forEach(item => {
             const btn = document.createElement("button");
@@ -134,16 +150,27 @@ class GameEngine {
         this.currentAttempt = 0;
         this.menuSelectionAttempts = 0;
         
-        document.getElementById("npc-avatar").innerText = this.currentCustomer.avatar;
-        document.getElementById("speech-text").innerText = `"${this.currentCustomer.text}"`;
-        document.getElementById("feedback").innerText = "";
-        document.getElementById("recognized-text").innerText = "";
-        document.getElementById("attempts-left").innerText = "";
+        const avatarEl = document.getElementById("npc-avatar");
+        const speechTextEl = document.getElementById("speech-text");
+        if (avatarEl) avatarEl.innerText = this.currentCustomer.avatar;
+        if (speechTextEl) speechTextEl.innerText = `"${this.currentCustomer.text}"`;
+
+        const feedbackEl = document.getElementById("feedback");
+        const recognizedEl = document.getElementById("recognized-text");
+        const attemptsEl = document.getElementById("attempts-left");
+        if (feedbackEl) feedbackEl.innerText = "";
+        if (recognizedEl) recognizedEl.innerText = "";
+        if (attemptsEl) attemptsEl.innerText = "";
         
-        document.getElementById("step-speaking").style.display = "none";
-        document.getElementById("retry-btn").classList.remove("visible");
-        document.getElementById("next-btn").classList.remove("visible");
-        document.getElementById("mic-btn").style.display = "inline-flex";
+        const stepSpeaking = document.getElementById("step-speaking");
+        const retryBtn = document.getElementById("retry-btn");
+        const nextBtn = document.getElementById("next-btn");
+        const micBtn = document.getElementById("mic-btn");
+
+        if (stepSpeaking) stepSpeaking.style.display = "none";
+        if (retryBtn) retryBtn.classList.remove("visible");
+        if (nextBtn) nextBtn.classList.remove("visible");
+        if (micBtn) micBtn.style.display = "inline-flex";
 
         const manualBtn = document.getElementById("manual-pass-btn");
         if (manualBtn) manualBtn.remove();
@@ -190,44 +217,58 @@ class GameEngine {
                 btnElement.disabled = true;
 
                 const hint = this.currentCustomer.hintText || "Try another choice!";
-                feedbackEl.innerText = `⚠️ Incorrect! Hint: "${hint}" Try picking another item!`;
-                feedbackEl.className = "feedback warning";
+                if (feedbackEl) {
+                    feedbackEl.innerText = `⚠️ Incorrect! Hint: "${hint}" Try picking another item!`;
+                    feedbackEl.className = "feedback warning";
+                }
 
                 const hintSpeech = new SpeechSynthesisUtterance("Not quite! " + hint);
                 hintSpeech.lang = 'en-US';
                 window.speechSynthesis.speak(hintSpeech);
 
             } else {
+                // 錯誤達兩次，扣除當前關卡分數
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
-                feedbackEl.innerText = "❌ Wrong item again! " + this.currentCustomer.failText;
-                feedbackEl.className = "feedback error";
+                if (feedbackEl) {
+                    feedbackEl.innerText = "❌ Wrong item again! " + this.currentCustomer.failText;
+                    feedbackEl.className = "feedback error";
+                }
 
                 const sadUtterance = new SpeechSynthesisUtterance(this.currentCustomer.failText);
                 sadUtterance.lang = 'en-US';
                 window.speechSynthesis.speak(sadUtterance);
 
                 document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
-                document.getElementById("step-speaking").style.display = "none";
-                document.getElementById("next-btn").classList.add("visible");
+                const stepSpeaking = document.getElementById("step-speaking");
+                const nextBtn = document.getElementById("next-btn");
+                if (stepSpeaking) stepSpeaking.style.display = "none";
+                if (nextBtn) nextBtn.classList.add("visible");
             }
 
         } else {
-            feedbackEl.innerText = "";
+            if (feedbackEl) feedbackEl.innerText = "";
             const templates = this.currentData.sentenceTemplates;
             const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
-            const itemWithArticle = `${item.article} ${item.name}`;
+            const itemWithArticle = item.article ? `${item.article} ${item.name}` : item.name;
             
             this.targetSentenceText = randomTemplate.replace("{item}", itemWithArticle);
             
-            document.getElementById("target-sentence").innerText = `"${this.targetSentenceText}"`;
-            document.getElementById("step-speaking").style.display = "block";
-            document.getElementById("attempts-left").innerText = `Attempts left: ${this.maxAttempts}`;
+            const targetSentenceEl = document.getElementById("target-sentence");
+            const stepSpeaking = document.getElementById("step-speaking");
+            const attemptsEl = document.getElementById("attempts-left");
+            const retryBtn = document.getElementById("retry-btn");
+            const micBtn = document.getElementById("mic-btn");
+            const nextBtn = document.getElementById("next-btn");
+
+            if (targetSentenceEl) targetSentenceEl.innerText = `"${this.targetSentenceText}"`;
+            if (stepSpeaking) stepSpeaking.style.display = "block";
+            if (attemptsEl) attemptsEl.innerText = `Attempts left: ${this.maxAttempts}`;
             
-            document.getElementById("retry-btn").classList.remove("visible");
-            document.getElementById("mic-btn").style.display = "inline-flex";
-            document.getElementById("next-btn").classList.remove("visible");
+            if (retryBtn) retryBtn.classList.remove("visible");
+            if (micBtn) micBtn.style.display = "inline-flex";
+            if (nextBtn) nextBtn.classList.remove("visible");
 
             let manualBtn = document.getElementById("manual-pass-btn");
             if (!manualBtn) {
@@ -236,7 +277,8 @@ class GameEngine {
                 manualBtn.innerText = "✅ I'm done speaking (Manual Pass)";
                 manualBtn.style.cssText = "display: block; margin: 10px auto 0 auto; background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;";
                 manualBtn.onclick = () => this.forceManualSuccess();
-                document.querySelector(".btn-group").after(manualBtn);
+                const btnGroup = document.querySelector(".btn-group");
+                if (btnGroup) btnGroup.after(manualBtn);
             }
 
             this.speakTargetSentence();
@@ -269,14 +311,19 @@ class GameEngine {
         this.resetMicBtn();
         
         const simulatedText = this.selectedItem.keywords.join(" ");
-        document.getElementById("recognized-text").innerText = `(Manual Mode) Verified: "${this.selectedItem.name}"`;
+        const recognizedEl = document.getElementById("recognized-text");
+        if (recognizedEl) recognizedEl.innerText = `(Manual Mode) Verified: "${this.selectedItem.name}"`;
         this.verifySpeech(simulatedText);
     }
 
     retrySpeaking() {
-        document.getElementById("feedback").innerText = "";
-        document.getElementById("retry-btn").classList.remove("visible");
-        document.getElementById("mic-btn").style.display = "inline-flex";
+        const feedbackEl = document.getElementById("feedback");
+        const retryBtn = document.getElementById("retry-btn");
+        const micBtn = document.getElementById("mic-btn");
+
+        if (feedbackEl) feedbackEl.innerText = "";
+        if (retryBtn) retryBtn.classList.remove("visible");
+        if (micBtn) micBtn.style.display = "inline-flex";
         this.speakTargetSentence();
     }
 
@@ -288,11 +335,14 @@ class GameEngine {
         const remainingAttempts = this.maxAttempts - this.currentAttempt;
 
         if (allKeywordsPresent) {
+            // 答對加分（針對當前關卡獨立加分）
             this.scores[this.currentLevelId] += 1;
             this.saveCurrentScore();
 
-            feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successText;
-            feedbackEl.className = "feedback success";
+            if (feedbackEl) {
+                feedbackEl.innerText = "✨ Excellent! " + this.currentCustomer.successText;
+                feedbackEl.className = "feedback success";
+            }
             
             const happyUtterance = new SpeechSynthesisUtterance("Yummy! Thank you!");
             happyUtterance.lang = 'en-US';
@@ -302,18 +352,26 @@ class GameEngine {
 
         } else {
             if (remainingAttempts > 0) {
-                feedbackEl.innerText = `⚠️ Almost there! Try saying "${this.selectedItem.name}" clearly.`;
-                feedbackEl.className = "feedback error";
-                document.getElementById("attempts-left").innerText = `Attempts left: ${remainingAttempts}`;
+                if (feedbackEl) {
+                    feedbackEl.innerText = `⚠️ Almost there! Try saying "${this.selectedItem.name}" clearly.`;
+                    feedbackEl.className = "feedback error";
+                }
+                const attemptsEl = document.getElementById("attempts-left");
+                if (attemptsEl) attemptsEl.innerText = `Attempts left: ${remainingAttempts}`;
                 
-                document.getElementById("mic-btn").style.display = "none";
-                document.getElementById("retry-btn").classList.add("visible");
+                const micBtn = document.getElementById("mic-btn");
+                const retryBtn = document.getElementById("retry-btn");
+                if (micBtn) micBtn.style.display = "none";
+                if (retryBtn) retryBtn.classList.add("visible");
             } else {
+                // 嘗試次數用完，扣除當前關卡分數
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
-                feedbackEl.innerText = `❌ Out of tries! The correct phrase is "${this.selectedItem.name}". (-1)`;
-                feedbackEl.className = "feedback error";
+                if (feedbackEl) {
+                    feedbackEl.innerText = `❌ Out of tries! The correct phrase is "${this.selectedItem.name}". (-1)`;
+                    feedbackEl.className = "feedback error";
+                }
                 this.finishRound();
             }
         }
@@ -321,23 +379,34 @@ class GameEngine {
 
     finishRound() {
         document.querySelectorAll(".option-btn").forEach(btn => btn.disabled = true);
-        document.getElementById("mic-btn").style.display = "none";
-        document.getElementById("retry-btn").classList.remove("visible");
+        const micBtn = document.getElementById("mic-btn");
+        const retryBtn = document.getElementById("retry-btn");
+        const attemptsEl = document.getElementById("attempts-left");
+        const nextBtn = document.getElementById("next-btn");
+
+        if (micBtn) micBtn.style.display = "none";
+        if (retryBtn) retryBtn.classList.remove("visible");
         const manualBtn = document.getElementById("manual-pass-btn");
         if (manualBtn) manualBtn.remove();
-        document.getElementById("attempts-left").innerText = "";
-        document.getElementById("next-btn").classList.add("visible");
+        if (attemptsEl) attemptsEl.innerText = "";
+        if (nextBtn) nextBtn.classList.add("visible");
     }
 
     openRedeemModal() {
-        document.getElementById("modal-level-name").innerText = this.currentData.title;
-        document.getElementById("modal-score").innerText = this.scores[this.currentLevelId];
-        document.getElementById("redeem-input").value = "";
-        document.getElementById("redeem-modal").classList.add("active");
+        const modalLevelName = document.getElementById("modal-level-name");
+        const modalScore = document.getElementById("modal-score");
+        const redeemInput = document.getElementById("redeem-input");
+        const redeemModal = document.getElementById("redeem-modal");
+
+        if (modalLevelName) modalLevelName.innerText = this.currentData.title;
+        if (modalScore) modalScore.innerText = this.scores[this.currentLevelId];
+        if (redeemInput) redeemInput.value = "";
+        if (redeemModal) redeemModal.classList.add("active");
     }
 
     closeRedeemModal() {
-        document.getElementById("redeem-modal").classList.remove("active");
+        const redeemModal = document.getElementById("redeem-modal");
+        if (redeemModal) redeemModal.classList.remove("active");
     }
 
     confirmRedeem() {
@@ -354,6 +423,7 @@ class GameEngine {
             return;
         }
 
+        // 扣除當前關卡的分數
         this.scores[this.currentLevelId] -= inputVal;
         this.saveCurrentScore();
         this.closeRedeemModal();
