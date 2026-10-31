@@ -219,11 +219,12 @@ class GameEngine {
                 window.speechSynthesis.speak(hintSpeech);
 
             } else {
+                // 選錯兩次直接扣分
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
                 if (feedbackEl) {
-                    feedbackEl.innerText = "❌ Wrong item again! " + this.currentCustomer.failText;
+                    feedbackEl.innerText = "❌ Wrong item again! " + this.currentCustomer.failText + " (-1)";
                     feedbackEl.className = "feedback error";
                 }
 
@@ -241,7 +242,7 @@ class GameEngine {
         } else {
             if (feedbackEl) feedbackEl.innerText = "";
             
-            const template = item.template || "I want {item}.";
+            const template = item.template || "Here is {item}.";
             const itemWithArticle = item.article ? `${item.article} ${item.name}` : item.name;
             
             this.targetSentenceText = template.replace("{item}", itemWithArticle);
@@ -334,14 +335,7 @@ class GameEngine {
                 feedbackEl.className = "feedback success";
             }
             
-            // 修正：依照目前關卡給予正確的語音反饋（餐廳維持 yummy，新篇章給予對應的稱讚）
-            let praiseText = "Awesome! Great job!";
-            if (this.currentLevelId === "restaurant") {
-                praiseText = "Yummy! Thank you!";
-            } else {
-                praiseText = "Wonderful! Excellent job!";
-            }
-
+            let praiseText = (this.currentLevelId === "restaurant") ? "Yummy! Thank you!" : "Wonderful! Great job!";
             const happyUtterance = new SpeechSynthesisUtterance(praiseText);
             happyUtterance.lang = 'en-US';
             window.speechSynthesis.speak(happyUtterance);
@@ -362,6 +356,7 @@ class GameEngine {
                 if (micBtn) micBtn.style.display = "none";
                 if (retryBtn) retryBtn.classList.add("visible");
             } else {
+                // 口說次數用完，確實執行扣分 (-1)
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
