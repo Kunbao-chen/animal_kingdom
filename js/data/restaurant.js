@@ -29,7 +29,7 @@ export const restaurantData = {
     customers: [
         {
             avatar: "🧔",
-            text: "It's scorching hot outside after my long walk. I definitely need something icy to chill out.",
+            text: "It is very hot today. I want a cold drink, please.",
             requiredTags: ["drink", "cold"],
             hintText: "Pick something cold to drink!",
             successText: "Ah, so refreshing! Thank you! (+1)",
@@ -37,26 +37,26 @@ export const restaurantData = {
         },
         {
             avatar: "👩",
-            text: "I just finished my heavy lunch, but I'm still craving something sweet and sugary.",
+            text: "I want something sweet. Do you have any dessert?",
             requiredTags: ["dessert"],
             hintText: "Pick a sweet dessert or treat!",
-            successText: "Mmm, so sweet and satisfying! (+1)",
+            successText: "Mmm, so sweet! Thank you! (+1)",
             failText: "That's not a sweet dessert! (-1)"
         },
         {
             avatar: "🧑",
-            text: "The weather is freezing today. I'd love to warm up with a steaming beverage.",
+            text: "It is cold today. I want a hot drink.",
             requiredTags: ["drink", "hot"],
-            hintText: "Pick a hot drink to warm up!",
-            successText: "Delicious and warm! Perfect! (+1)",
+            hintText: "Pick a hot drink!",
+            successText: "Delicious and warm! Thank you! (+1)",
             failText: "That's not a hot drink! (-1)"
         },
         {
             avatar: "👧",
-            text: "I skipped breakfast and I am extremely hungry. I need a solid, warm meal right now.",
+            text: "I am hungry. I want a big meal.",
             requiredTags: ["food", "meal"],
             hintText: "Pick a hearty meal like pizza, burger, or noodles!",
-            successText: "Yum! This meal looks amazing! (+1)",
+            successText: "Yum! This looks delicious! (+1)",
             failText: "That's not a proper meal! (-1)"
         }
     ]
