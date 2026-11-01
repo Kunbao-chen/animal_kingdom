@@ -3,12 +3,19 @@ export const topic1ComprehensiveData = {
     title: "Super Fun 5 - Topic 1 (Zoo & Prep Full Edition)",
 
     menu: [
-        { id: "sunday", name: "Sunday", article: "", keywords: ["sunday"], tags: ["day", "zoo"], template: "It is {item} today." },
-        { id: "monday", name: "Monday", article: "", keywords: ["monday"], tags: ["day", "school"], template: "How about {item}?" },
+        // 🐾 A. 星期類：修正為自然的回答句型
+        { id: "sunday", name: "Sunday", article: "", keywords: ["sunday"], tags: ["day", "zoo"], template: "It is {item}." },
+        { id: "monday", name: "Monday", article: "", keywords: ["monday"], tags: ["day", "school"], template: "It is {item}." },
+        
+        // 🧸 B. 玩具類
         { id: "yo_yos", name: "Yo-yos", article: "", keywords: ["yo", "yos"], tags: ["toy", "fun"], template: "Would you like my {item}?" },
         { id: "robots", name: "Robots", article: "", keywords: ["robots"], tags: ["toy", "fun"], template: "Here are my {item}." },
+        
+        // 🍕 C. 食物飲料類
         { id: "pizza", name: "Pizza", article: "some", keywords: ["pizza"], tags: ["food", "lunch"], template: "Let's get some {item}." },
         { id: "juice", name: "Juice", article: "some", keywords: ["juice"], tags: ["food", "drink"], template: "How about some {item}?" },
+        
+        // 🔤 D. 發音類
         { id: "chair", name: "Chair", article: "a", keywords: ["chair"], tags: ["phonics", "ch"], template: "Look at the {item}." },
         { id: "fish", name: "Fish", article: "a", keywords: ["fish"], tags: ["phonics", "sh", "zoo"], template: "Do you see a {item}?" },
         { id: "whale", name: "Whale", article: "a", keywords: ["whale"], tags: ["phonics", "wh, zoo"], template: "Look at that big {item}." },
