@@ -58,7 +58,7 @@ class GameEngine {
         if (!LEVELS[levelId]) return;
         this.currentLevelId = levelId;
         this.currentData = LEVELS[levelId];
-        this.lastCustomerIndex = -1; // 切換關卡時重置紀錄
+        this.lastCustomerIndex = -1;
         this.updateScoreUI();
         this.loadTheme();
     }
@@ -89,9 +89,13 @@ class GameEngine {
                 clearTimeout(this.speechTimeout);
                 this.speechTimeout = setTimeout(() => {
                     if (this.isListening) {
-                        this.forceManualSuccess();
+                        // 逾時未說話，視為辨識失敗（不自動給分，改為要求重試或手動略過）
+                        if (this.recognition) {
+                            try { this.recognition.stop(); } catch(e) {}
+                        }
+                        this.handleSpeechFailure("No speech detected. Try again!");
                     }
-                }, 4000);
+                }, 5000);
             };
 
             this.recognition.onresult = (event) => {
@@ -105,7 +109,7 @@ class GameEngine {
             this.recognition.onerror = (event) => {
                 clearTimeout(this.speechTimeout);
                 console.warn("Speech recognition error:", event.error);
-                this.forceManualSuccess();
+                this.handleSpeechFailure("Speech recognition error. Please try again or use Manual Pass.");
             };
 
             this.recognition.onend = () => {
@@ -138,7 +142,6 @@ class GameEngine {
         if (!grid) return;
         grid.innerHTML = "";
 
-        // 隨機洗牌選項
         const shuffledItems = [...menuItems].sort(() => Math.random() - 0.5);
 
         shuffledItems.forEach(item => {
@@ -155,7 +158,6 @@ class GameEngine {
         const customers = this.currentData.customers;
         if (!customers || customers.length === 0) return;
         
-        // 嚴格防連續重複抽題
         let randomIndex;
         if (customers.length > 1) {
             do {
@@ -307,12 +309,13 @@ class GameEngine {
 
     startListening() {
         if (!this.recognition) {
+            // 若瀏覽器不支援語音辨識，則走手動通過
             this.forceManualSuccess();
             return;
         }
 
         if (this.isListening) {
-            this.forceManualSuccess();
+            try { this.recognition.stop(); } catch(e) {}
             return;
         }
 
@@ -320,7 +323,7 @@ class GameEngine {
         try {
             this.recognition.start();
         } catch (e) {
-            this.forceManualSuccess();
+            this.handleSpeechFailure("Microphone error. Try again.");
         }
     }
 
@@ -330,9 +333,10 @@ class GameEngine {
         }
         this.resetMicBtn();
         
+        // 強制模擬正確讀出關鍵字
         const simulatedText = this.selectedItem.keywords.join(" ");
         const recognizedEl = document.getElementById("recognized-text");
-        if (recognizedEl) recognizedEl.innerText = `(Manual Mode) Verified: "${this.selectedItem.name}"`;
+        if (recognizedEl) recognizedEl.innerText = `(Manual Pass) Verified: "${this.selectedItem.name}"`;
         this.verifySpeech(simulatedText);
     }
 
@@ -355,6 +359,7 @@ class GameEngine {
         const remainingAttempts = this.maxAttempts - this.currentAttempt;
 
         if (allKeywordsPresent) {
+            // 真正答對
             this.scores[this.currentLevelId] += 1;
             this.saveCurrentScore();
 
@@ -371,9 +376,10 @@ class GameEngine {
             this.finishRound();
 
         } else {
+            // 唸錯或辨識不符
             if (remainingAttempts > 0) {
                 if (feedbackEl) {
-                    feedbackEl.innerText = `⚠️ Almost there! Try saying "${this.selectedItem.name}" clearly.`;
+                    feedbackEl.innerText = `⚠️ Not quite right! Try saying "${this.selectedItem.name}" clearly again.`;
                     feedbackEl.className = "feedback error";
                 }
                 const attemptsEl = document.getElementById("attempts-left");
@@ -383,7 +389,13 @@ class GameEngine {
                 const retryBtn = document.getElementById("retry-btn");
                 if (micBtn) micBtn.style.display = "none";
                 if (retryBtn) retryBtn.classList.add("visible");
+
+                const errUtterance = new SpeechSynthesisUtterance("Try again!");
+                errUtterance.lang = 'en-US';
+                window.speechSynthesis.speak(errUtterance);
+
             } else {
+                // 次數用盡，確實扣分 (-1)
                 this.scores[this.currentLevelId] = Math.max(0, this.scores[this.currentLevelId] - 1);
                 this.saveCurrentScore();
 
@@ -391,9 +403,27 @@ class GameEngine {
                     feedbackEl.innerText = `❌ Out of tries! The correct phrase is "${this.selectedItem.name}". (-1)`;
                     feedbackEl.className = "feedback error";
                 }
+
+                const failUtterance = new SpeechSynthesisUtterance("Incorrect! Let's try the next customer.");
+                failUtterance.lang = 'en-US';
+                window.speechSynthesis.speak(failUtterance);
+
                 this.finishRound();
             }
         }
+    }
+
+    handleSpeechFailure(msg) {
+        this.resetMicBtn();
+        const feedbackEl = document.getElementById("feedback");
+        if (feedbackEl) {
+            feedbackEl.innerText = `⚠️ ${msg}`;
+            feedbackEl.className = "feedback warning";
+        }
+        const micBtn = document.getElementById("mic-btn");
+        const retryBtn = document.getElementById("retry-btn");
+        if (micBtn) micBtn.style.display = "none";
+        if (retryBtn) retryBtn.classList.add("visible");
     }
 
     finishRound() {
