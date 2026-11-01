@@ -23,6 +23,7 @@ class GameEngine {
             this.maxAttempts = 3;
             this.currentAttempt = 0;
             this.menuSelectionAttempts = 0;
+            this.lastCustomerIndex = -1;
 
             this.loadScoresFromStorage();
             this.initSpeechRecognition();
@@ -57,6 +58,7 @@ class GameEngine {
         if (!LEVELS[levelId]) return;
         this.currentLevelId = levelId;
         this.currentData = LEVELS[levelId];
+        this.lastCustomerIndex = -1; // 切換關卡時重置紀錄
         this.updateScoreUI();
         this.loadTheme();
     }
@@ -136,7 +138,7 @@ class GameEngine {
         if (!grid) return;
         grid.innerHTML = "";
 
-        // 選項隨機洗牌 (Shuffle)
+        // 隨機洗牌選項
         const shuffledItems = [...menuItems].sort(() => Math.random() - 0.5);
 
         shuffledItems.forEach(item => {
@@ -153,7 +155,17 @@ class GameEngine {
         const customers = this.currentData.customers;
         if (!customers || customers.length === 0) return;
         
-        const randomIndex = Math.floor(Math.random() * customers.length);
+        // 嚴格防連續重複抽題
+        let randomIndex;
+        if (customers.length > 1) {
+            do {
+                randomIndex = Math.floor(Math.random() * customers.length);
+            } while (randomIndex === this.lastCustomerIndex);
+        } else {
+            randomIndex = 0;
+        }
+        this.lastCustomerIndex = randomIndex;
+
         this.currentCustomer = customers[randomIndex];
         this.currentAttempt = 0;
         this.menuSelectionAttempts = 0;
