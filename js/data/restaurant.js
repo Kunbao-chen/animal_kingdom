@@ -4,7 +4,7 @@ export const restaurantData = {
 
     menu: [
         { id: "iced_coffee", name: "Iced Coffee", article: "", keywords: ["iced", "coffee"], tags: ["drink", "cold"], template: "How about some {item}?" },
-        { id: "hot_coffee", name: "Hot Coffee", article: "a", keywords: ["hot", "coffee"], tags: ["drink", "hot"], template: "Would you like a cup of {item}?" },
+        { id: "hot_coffee", name: "Hot Coffee", article: "", keywords: ["hot", "coffee"], tags: ["drink", "hot"], template: "Would you like a cup of {item}?" },
         { id: "iced_tea", name: "Iced Tea", article: "", keywords: ["iced", "tea"], tags: ["drink", "cold"], template: "Here is some {item}." },
         { id: "hot_tea", name: "Hot Tea", article: "", keywords: ["hot", "tea"], tags: ["drink", "hot"], template: "How about a cup of {item}?" },
         { id: "apple_juice", name: "Apple Juice", article: "", keywords: ["apple", "juice"], tags: ["drink", "cold", "sweet"], template: "Would you like some {item}?" },
@@ -13,18 +13,18 @@ export const restaurantData = {
         { id: "bubble_tea", name: "Bubble Tea", article: "", keywords: ["bubble", "tea"], tags: ["drink", "sweet"], template: "Would you like some {item}?" },
         { id: "water", name: "Water", article: "", keywords: ["water"], tags: ["drink", "healthy"], template: "Here is some {item}." },
         
-        { id: "hamburger", name: "Hamburger", article: "a", keywords: ["hamburger"], tags: ["food", "hot", "meal"], template: "Would you like a {item}?" },
-        { id: "hot_dog", name: "Hot Dog", article: "a", keywords: ["hot", "dog"], tags: ["food", "hot", "meal"], template: "How about a {item}?" },
+        { id: "hamburger", name: "Hamburger", article: "", keywords: ["hamburger"], tags: ["food", "hot", "meal"], template: "Would you like a {item}?" },
+        { id: "hot_dog", name: "Hot Dog", article: "", keywords: ["hot", "dog"], tags: ["food", "hot", "meal"], template: "How about a {item}?" },
         { id: "pizza", name: "Pizza", article: "", keywords: ["pizza"], tags: ["food", "hot", "meal"], template: "Let's have some {item}." },
-        { id: "sandwich", name: "Sandwich", article: "a", keywords: ["sandwich"], tags: ["food", "meal"], template: "Here is a {item} for you." },
+        { id: "sandwich", name: "Sandwich", article: "", keywords: ["sandwich"], tags: ["food", "meal"], template: "Here is a {item} for you." },
         { id: "noodles", name: "Noodles", article: "", keywords: ["noodles"], tags: ["food", "hot", "meal"], template: "Would you like some {item}?" },
         { id: "fried_chicken", name: "Fried Chicken", article: "", keywords: ["fried", "chicken"], tags: ["food", "hot", "meal"], template: "How about some {item}?" },
-        { id: "salad", name: "Salad", article: "a", keywords: ["salad"], tags: ["food", "healthy"], template: "Here is a fresh {item}." },
+        { id: "salad", name: "Salad", article: "", keywords: ["salad"], tags: ["food", "healthy"], template: "Here is a fresh {item}." },
         
         { id: "ice_cream", name: "Ice Cream", article: "", keywords: ["ice", "cream"], tags: ["dessert", "cold", "sweet"], template: "Would you like some {item}?" },
         { id: "chocolate_cake", name: "Chocolate Cake", article: "", keywords: ["chocolate", "cake"], tags: ["dessert", "sweet"], template: "How about a slice of {item}?" },
-        { id: "cookie", name: "Cookie", article: "a", keywords: ["cookie"], tags: ["dessert", "sweet"], template: "Here is a {item}." },
-        { id: "donut", name: "Donut", article: "a", keywords: ["donut"], tags: ["dessert", "sweet"], template: "Would you like a {item}?" },
+        { id: "cookie", name: "Cookie", article: "", keywords: ["cookie"], tags: ["dessert", "sweet"], template: "Here is a {item}." },
+        { id: "donut", name: "Donut", article: "", keywords: ["donut"], tags: ["dessert", "sweet"], template: "Would you like a {item}?" },
         { id: "fruit_salad", name: "Fruit Salad", article: "", keywords: ["fruit", "salad"], tags: ["dessert", "healthy", "sweet"], template: "Here is some {item}." }
     ],
 
